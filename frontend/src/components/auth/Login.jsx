@@ -34,8 +34,11 @@ const Login = () => {
           navigate("/");
       },
       onError: (error) => {
-        const { response } = error;
-        enqueueSnackbar(response.data.message, { variant: "error" });
+        const message =
+          error?.response?.data?.message ||
+          error?.message ||
+          "Login failed. Check your connection / backend URL.";
+        enqueueSnackbar(message, { variant: "error" });
       }
     })
 
