@@ -1,7 +1,8 @@
 const Razorpay = require("razorpay");
 const config = require("../config/config");
 const crypto = require("crypto");
-const Payment = require("../models/paymentModel");
+const createHttpError = require("http-errors");
+const supabase = require("../config/supabase");
 
 const createOrder = async (req, res, next) => {
   const razorpay = new Razorpay({
@@ -38,8 +39,7 @@ const verifyPayment = async (req, res, next) => {
     if (expectedSignature === razorpay_signature) {
       res.json({ success: true, message: "Payment verified successfully!" });
     } else {
-      const error = createHttpError(400, "Payment verification failed!");
-      return next(error);
+      return next(createHttpError(400, "Payment verification failed!"));
     }
   } catch (error) {
     next(error);
@@ -62,31 +62,28 @@ const webHookVerification = async (req, res, next) => {
     if (expectedSignature === signature) {
       console.log("✅ Webhook verified:", req.body);
 
-      // ✅ Process payment (e.g., update DB, send confirmation email)
       if (req.body.event === "payment.captured") {
         const payment = req.body.payload.payment.entity;
         console.log(`💰 Payment Captured: ${payment.amount / 100} INR`);
 
-        // Add Payment Details in Database
-        const newPayment = new Payment({
-          paymentId: payment.id,
-          orderId: payment.order_id,
+        const { error } = await supabase.from("payments").insert({
+          payment_id: payment.id,
+          order_id: payment.order_id,
           amount: payment.amount / 100,
           currency: payment.currency,
           status: payment.status,
           method: payment.method,
           email: payment.email,
           contact: payment.contact,
-          createdAt: new Date(payment.created_at * 1000) 
-        })
+          created_at: new Date(payment.created_at * 1000).toISOString(),
+        });
 
-        await newPayment.save();
+        if (error) console.log("⚠️ Payment insert failed:", error.message);
       }
 
       res.json({ success: true });
     } else {
-      const error = createHttpError(400, "❌ Invalid Signature!");
-      return next(error);
+      return next(createHttpError(400, "❌ Invalid Signature!"));
     }
   } catch (error) {
     next(error);

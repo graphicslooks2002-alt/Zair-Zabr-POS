@@ -1,34 +1,34 @@
 const createHttpError = require("http-errors");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
-const User = require("../models/userModel");
-
+const supabase = require("../config/supabase");
 
 const isVerifiedUser = async (req, res, next) => {
-    try{
+  try {
+    const { accessToken } = req.cookies;
 
-        const { accessToken } = req.cookies;
-        
-        if(!accessToken){
-            const error = createHttpError(401, "Please provide token!");
-            return next(error);
-        }
-
-        const decodeToken = jwt.verify(accessToken, config.accessTokenSecret);
-
-        const user = await User.findById(decodeToken._id);
-        if(!user){
-            const error = createHttpError(401, "User not exist!");
-            return next(error);
-        }
-
-        req.user = user;
-        next();
-
-    }catch (error) {
-        const err = createHttpError(401, "Invalid Token!");
-        next(err);
+    if (!accessToken) {
+      return next(createHttpError(401, "Please provide token!"));
     }
-}
+
+    const decodeToken = jwt.verify(accessToken, config.accessTokenSecret);
+
+    const { data: user } = await supabase
+      .from("users")
+      .select("id, name, email, phone, role")
+      .eq("id", decodeToken._id)
+      .maybeSingle();
+
+    if (!user) {
+      return next(createHttpError(401, "User not exist!"));
+    }
+
+    // keep req.user._id working for existing controllers
+    req.user = { _id: user.id, ...user };
+    next();
+  } catch (error) {
+    next(createHttpError(401, "Invalid Token!"));
+  }
+};
 
 module.exports = { isVerifiedUser };
