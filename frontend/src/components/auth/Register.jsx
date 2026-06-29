@@ -22,6 +22,7 @@ const Register = ({setIsRegister}) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    if (registerMutation.isPending) return; // ignore repeat clicks while in flight
     registerMutation.mutate(formData);
   };
 
@@ -141,9 +142,10 @@ const Register = ({setIsRegister}) => {
 
         <button
           type="submit"
-          className="w-full rounded-lg mt-6 py-3 text-lg bg-[#e85d04] text-white font-bold"
+          disabled={registerMutation.isPending}
+          className="w-full rounded-lg mt-6 py-3 text-lg bg-[#e85d04] text-white font-bold disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Sign up
+          {registerMutation.isPending ? "Signing up..." : "Sign up"}
         </button>
       </form>
     </div>

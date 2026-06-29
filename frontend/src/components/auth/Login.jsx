@@ -21,6 +21,7 @@ const Login = () => {
   
     const handleSubmit = (e) => {
       e.preventDefault();
+      if (loginMutation.isPending) return; // ignore repeat clicks while in flight
       loginMutation.mutate(formData);
     }
 
@@ -31,7 +32,7 @@ const Login = () => {
           console.log(data);
           const { _id, name, email, phone, role } = data.data;
           dispatch(setUser({ _id, name, email, phone, role }));
-          navigate("/");
+          navigate(role === "Admin" ? "/" : "/orders");
       },
       onError: (error) => {
         const message =
@@ -80,9 +81,10 @@ const Login = () => {
 
         <button
           type="submit"
-          className="w-full rounded-lg mt-6 py-3 text-lg bg-[#e85d04] text-white font-bold"
+          disabled={loginMutation.isPending}
+          className="w-full rounded-lg mt-6 py-3 text-lg bg-[#e85d04] text-white font-bold disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          Sign in
+          {loginMutation.isPending ? "Signing in..." : "Sign in"}
         </button>
       </form>
     </div>

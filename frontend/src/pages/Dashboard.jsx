@@ -3,6 +3,8 @@ import { MdTableBar, MdCategory } from "react-icons/md";
 import { BiSolidDish } from "react-icons/bi";
 import Metrics from "../components/dashboard/Metrics";
 import RecentOrders from "../components/dashboard/RecentOrders";
+import PendingPayments from "../components/dashboard/PendingPayments";
+import ManageStaff from "../components/dashboard/ManageStaff";
 import Modal from "../components/dashboard/Modal";
 import BottomNav from "../components/shared/BottomNav";
 
@@ -12,7 +14,7 @@ const buttons = [
   { label: "Add Dishes", icon: <BiSolidDish />, action: "dishes" },
 ];
 
-const tabs = ["Metrics", "Orders", "Payments"];
+const tabs = ["Metrics", "Orders", "Payments", "Staff"];
 
 const Dashboard = () => {
   useEffect(() => {
@@ -61,11 +63,8 @@ const Dashboard = () => {
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-20 px-6">
         {activeTab === "Metrics" && <Metrics />}
         {activeTab === "Orders" && <RecentOrders />}
-        {activeTab === "Payments" && (
-          <div className="text-white p-6 container mx-auto">
-            Payment Component Coming Soon
-          </div>
-        )}
+        {activeTab === "Payments" && <PendingPayments />}
+        {activeTab === "Staff" && <ManageStaff />}
       </div>
 
       {isTableModalOpen && (

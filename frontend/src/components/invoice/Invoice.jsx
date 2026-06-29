@@ -1,29 +1,85 @@
 import React, { useRef } from "react";
-import { motion } from "framer-motion";
-import { FaCheck } from "react-icons/fa6";
+import { formatDateAndTime } from "../../utils/index";
+
+const URDU_NOTES = [
+  "کاؤنٹر چھوڑنے کے بعد کوئی شکایت قابل قبول نہ ہوگی۔",
+  "تیار شدہ آرڈر واپس یا تبدیل نہیں ہوگا۔",
+  "ہمارے ریسٹورنٹ میں تشریف لانے کا شکریہ، دوبارہ ضرور آئیں۔",
+];
 
 const Invoice = ({ orderInfo, setShowInvoice }) => {
   const invoiceRef = useRef(null);
+  const bills = orderInfo.bills || {};
+  const c = orderInfo.customerDetails || {};
+  const items = orderInfo.items || [];
 
   const handlePrint = () => {
-    const printContent = invoiceRef.current.innerHTML;
-    const WinPrint = window.open("", "", "width=900,height=650");
+    const itemRows = items
+      .map(
+        (it) => `
+        <tr>
+          <td class="qty">${it.quantity}</td>
+          <td class="name">${it.name}</td>
+          <td class="num">${Number(it.pricePerQuantity || it.price / it.quantity).toFixed(0)}</td>
+          <td class="num">${Number(it.price).toFixed(0)}</td>
+        </tr>`
+      )
+      .join("");
+
+    const urdu = URDU_NOTES.map((n) => `<div class="urdu">${n}</div>`).join("");
+
+    const html = `
+      <div class="center">
+        <div class="title">ZAIR ZABAR</div>
+        <div class="muted">Vital Market 50 Wala Road, Near Sarim Hospital, Haroonabad</div>
+        <div class="muted">Cell #: 03194562211</div>
+        <div class="muted">Timing: 12:00 PM - 12:00 AM</div>
+      </div>
+      <div class="divider"></div>
+      <div class="row"><span>Bill #: ${orderInfo._id ? orderInfo._id.slice(-6).toUpperCase() : "—"}</span><span>${formatDateAndTime(orderInfo.orderDate)}</span></div>
+      <div class="row"><span>Customer: ${c.name || "—"}</span><span>${orderInfo.orderType || ""}</span></div>
+      <table class="items">
+        <thead>
+          <tr><th class="qty">QTY</th><th class="name">PRODUCT NAME</th><th class="num">RATE</th><th class="num">AMOUNT</th></tr>
+        </thead>
+        <tbody>${itemRows}</tbody>
+      </table>
+      <div class="divider"></div>
+      <div class="row"><span>Total Items: ${items.length}</span><span>Gross: ${Number(bills.total || 0).toFixed(0)}</span></div>
+      ${bills.discount > 0 ? `<div class="row"><span></span><span>Discount: ${Number(bills.discount).toFixed(0)}</span></div>` : ""}
+      <div class="totalbar"><span>Total Bill</span><span>Rs ${Number(bills.totalWithTax || 0).toFixed(0)}</span></div>
+      <div class="row pay"><span>Payment: ${orderInfo.paymentMethod || "—"}${orderInfo.paymentStatus ? " · " + orderInfo.paymentStatus : ""}</span></div>
+      ${orderInfo.notes ? `<div class="row"><span>Notes: ${orderInfo.notes}</span></div>` : ""}
+      <div class="divider"></div>
+      <div class="urdu-block">${urdu}</div>
+    `;
+
+    const WinPrint = window.open("", "", "width=400,height=680");
     WinPrint.document.write(`
       <html>
         <head>
           <title>Zair Zabar - Receipt</title>
           <style>
-            body { font-family: Arial, sans-serif; padding: 20px; max-width: 350px; margin: 0 auto; }
-            h2 { text-align: center; margin: 5px 0; }
-            p { margin: 2px 0; }
+            * { box-sizing: border-box; }
+            body { font-family: 'Courier New', monospace; width: 300px; margin: 0 auto; padding: 12px; color: #000; }
             .center { text-align: center; }
-            .border-t { border-top: 1px dashed #ccc; padding-top: 8px; margin-top: 8px; }
-            .flex { display: flex; justify-content: space-between; }
-            .bold { font-weight: bold; }
-            .small { font-size: 12px; }
+            .title { font-size: 20px; font-weight: bold; letter-spacing: 2px; }
+            .muted { font-size: 10px; line-height: 1.4; }
+            .divider { border-top: 1px dashed #000; margin: 6px 0; }
+            .row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; margin: 3px 0; }
+            table.items { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 12px; }
+            table.items th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 3px 2px; text-align: left; }
+            table.items td { padding: 2px; vertical-align: top; }
+            .qty { width: 28px; }
+            .num { text-align: right; white-space: nowrap; }
+            .name { text-align: left; }
+            .totalbar { display: flex; justify-content: space-between; background: #000; color: #fff; font-weight: bold; font-size: 15px; padding: 5px 8px; margin: 6px 0; }
+            .pay { font-size: 12px; }
+            .urdu-block { margin-top: 6px; direction: rtl; }
+            .urdu { font-size: 12px; text-align: right; line-height: 1.7; }
           </style>
         </head>
-        <body>${printContent}</body>
+        <body>${html}</body>
       </html>
     `);
     WinPrint.document.close();
@@ -31,93 +87,92 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
     setTimeout(() => {
       WinPrint.print();
       WinPrint.close();
-    }, 1000);
+    }, 400);
   };
 
+  const rate = (it) => Number(it.pricePerQuantity || it.price / it.quantity).toFixed(0);
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[100]">
-      <div className="bg-white rounded-lg shadow-lg w-[380px] max-h-[90vh] flex flex-col">
-        {/* Scrollable receipt */}
-        <div className="overflow-y-auto flex-1 p-4" ref={invoiceRef}>
-          {/* Success icon */}
-          <div className="flex justify-center mb-3">
-            <motion.div
-              initial={{ scale: 0, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5, type: "spring", stiffness: 150 }}
-              className="w-10 h-10 border-4 border-green-500 rounded-full flex items-center justify-center bg-green-500"
-            >
-              <FaCheck className="text-white text-lg" />
-            </motion.div>
+    <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[100] p-4">
+      <div className="bg-white rounded-lg shadow-lg w-[340px] max-h-[90vh] flex flex-col">
+        <div className="overflow-y-auto flex-1 px-5 py-4 text-gray-900 font-mono" ref={invoiceRef}>
+          {/* Header */}
+          <div className="text-center">
+            <h2 className="text-xl font-bold tracking-widest">ZAIR ZABAR</h2>
+            <p className="text-[10px] leading-tight mt-1">Vital Market 50 Wala Road, Near Sarim Hospital, Haroonabad</p>
+            <p className="text-[10px]">Cell #: 03194562211</p>
+            <p className="text-[10px]">Timing: 12:00 PM - 12:00 AM</p>
           </div>
 
-          <h2 className="text-lg font-bold text-center">Zair Zabar</h2>
-          <p className="text-gray-500 text-center text-xs">
-            Vital Market 50 Wala Road, Near Sarim Hospital, Haroonabad
-          </p>
-          <p className="text-gray-500 text-center text-xs">Ph: 03194562211</p>
-          <p className="text-gray-600 text-center text-xs mt-1">
-            Thank you for your order!
-          </p>
+          <div className="border-t border-dashed border-gray-500 my-2" />
 
-          {/* Order Details */}
-          <div className="mt-3 border-t border-dashed pt-3 text-xs text-gray-700">
-            <p><strong>Order ID:</strong> {orderInfo._id ? orderInfo._id.slice(-6) : Math.floor(new Date(orderInfo.orderDate).getTime())}</p>
-            <p><strong>Name:</strong> {orderInfo.customerDetails.name}</p>
-            <p><strong>Phone:</strong> {orderInfo.customerDetails.phone}</p>
-            <p><strong>Guests:</strong> {orderInfo.customerDetails.guests}</p>
+          <div className="flex justify-between text-xs">
+            <span>Bill #: {orderInfo._id ? orderInfo._id.slice(-6).toUpperCase() : "—"}</span>
+            <span>{formatDateAndTime(orderInfo.orderDate)}</span>
+          </div>
+          <div className="flex justify-between text-xs mt-0.5">
+            <span>Customer: {c.name || "—"}</span>
+            <span>{orderInfo.orderType || ""}</span>
           </div>
 
-          {/* Items */}
-          <div className="mt-3 border-t border-dashed pt-3">
-            <h3 className="text-xs font-semibold mb-1">Items Ordered</h3>
-            {orderInfo.items.map((item, index) => (
-              <div key={index} className="flex justify-between text-xs text-gray-700 py-0.5">
-                <span>{item.name} x{item.quantity}</span>
-                <span>Rs{item.price.toFixed(0)}</span>
-              </div>
+          {/* Items table */}
+          <table className="w-full text-xs mt-2" style={{ borderCollapse: "collapse" }}>
+            <thead>
+              <tr className="border-y border-dashed border-gray-500">
+                <th className="text-left py-1 w-7">QTY</th>
+                <th className="text-left py-1">PRODUCT NAME</th>
+                <th className="text-right py-1">RATE</th>
+                <th className="text-right py-1">AMOUNT</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((it, i) => (
+                <tr key={i} className="align-top">
+                  <td className="py-1">{it.quantity}</td>
+                  <td className="py-1 pr-1">{it.name}</td>
+                  <td className="py-1 text-right whitespace-nowrap">{rate(it)}</td>
+                  <td className="py-1 text-right whitespace-nowrap">{Number(it.price).toFixed(0)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          <div className="border-t border-dashed border-gray-500 my-2" />
+
+          <div className="flex justify-between text-xs">
+            <span>Total Items: {items.length}</span>
+            <span>Gross: {Number(bills.total || 0).toFixed(0)}</span>
+          </div>
+          {bills.discount > 0 && (
+            <div className="flex justify-end text-xs mt-0.5">
+              <span>Discount: {Number(bills.discount).toFixed(0)}</span>
+            </div>
+          )}
+
+          {/* Total bill highlighted */}
+          <div className="flex justify-between items-center bg-black text-white font-bold text-base px-3 py-1.5 my-2">
+            <span>Total Bill</span>
+            <span>Rs {Number(bills.totalWithTax || 0).toFixed(0)}</span>
+          </div>
+
+          <div className="text-xs">Payment: {orderInfo.paymentMethod || "—"}{orderInfo.paymentStatus ? ` · ${orderInfo.paymentStatus}` : ""}</div>
+          {orderInfo.notes && <div className="text-xs mt-0.5">Notes: {orderInfo.notes}</div>}
+
+          <div className="border-t border-dashed border-gray-500 my-2" />
+
+          {/* Urdu footer */}
+          <div dir="rtl" className="space-y-1">
+            {URDU_NOTES.map((n, i) => (
+              <p key={i} className="text-xs text-right leading-relaxed">{n}</p>
             ))}
-          </div>
-
-          {/* Bills */}
-          <div className="mt-3 border-t border-dashed pt-3 text-xs">
-            <div className="flex justify-between">
-              <span>Subtotal</span>
-              <span>Rs{orderInfo.bills.total.toFixed(0)}</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Tax</span>
-              <span>Rs{orderInfo.bills.tax.toFixed(0)}</span>
-            </div>
-            <div className="flex justify-between font-bold text-sm mt-1">
-              <span>Grand Total</span>
-              <span>Rs{orderInfo.bills.totalWithTax.toFixed(0)}</span>
-            </div>
-          </div>
-
-          {/* Payment */}
-          <div className="mt-2 border-t border-dashed pt-2 text-xs text-gray-600">
-            <p><strong>Payment:</strong> {orderInfo.paymentMethod}</p>
-            {orderInfo.paymentMethod === "Online" && orderInfo.paymentData && (
-              <>
-                <p><strong>Razorpay ID:</strong> {orderInfo.paymentData.razorpay_payment_id}</p>
-              </>
-            )}
           </div>
         </div>
 
-        {/* Fixed buttons at bottom */}
         <div className="flex gap-2 p-3 border-t shrink-0">
-          <button
-            onClick={handlePrint}
-            className="bg-[#025cca] text-white px-4 py-2 rounded-lg text-sm font-semibold w-full"
-          >
+          <button onClick={handlePrint} className="bg-[#025cca] text-white px-4 py-2 rounded-lg text-sm font-semibold w-full">
             Print Receipt
           </button>
-          <button
-            onClick={() => setShowInvoice(false)}
-            className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold w-full"
-          >
+          <button onClick={() => setShowInvoice(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold w-full">
             Close
           </button>
         </div>

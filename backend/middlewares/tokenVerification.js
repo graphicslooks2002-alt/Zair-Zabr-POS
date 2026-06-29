@@ -1,7 +1,6 @@
 const createHttpError = require("http-errors");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
-const supabase = require("../config/supabase");
 
 const isVerifiedUser = async (req, res, next) => {
   try {
@@ -11,20 +10,11 @@ const isVerifiedUser = async (req, res, next) => {
       return next(createHttpError(401, "Please provide token!"));
     }
 
+    // Trust the signed JWT — no DB round-trip per request. The token carries
+    // the user id + role; getUserData re-fetches the full profile when needed.
     const decodeToken = jwt.verify(accessToken, config.accessTokenSecret);
 
-    const { data: user } = await supabase
-      .from("users")
-      .select("id, name, email, phone, role")
-      .eq("id", decodeToken._id)
-      .maybeSingle();
-
-    if (!user) {
-      return next(createHttpError(401, "User not exist!"));
-    }
-
-    // keep req.user._id working for existing controllers
-    req.user = { _id: user.id, ...user };
+    req.user = { _id: decodeToken._id, role: decodeToken.role };
     next();
   } catch (error) {
     next(createHttpError(401, "Invalid Token!"));

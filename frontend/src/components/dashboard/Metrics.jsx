@@ -1,36 +1,68 @@
 import React, { useMemo, useState } from "react";
-import { keepPreviousData, useQuery } from "@tanstack/react-query";
+import { useNavigate } from "react-router-dom";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { enqueueSnackbar } from "notistack";
 import { menus } from "../../constants";
-import { getOrders, getTables } from "../../https/index";
+import {
+  getSessionSummary,
+  getSummary,
+  getTables,
+  openSession,
+  closeSession,
+} from "../../https/index";
+import { formatDateAndTime } from "../../utils/index";
 
-const RANGES = ["Today", "Last 7 Days", "Last 1 Month", "All Time"];
-
-const rangeStart = (range) => {
-  const d = new Date();
-  if (range === "Today") {
-    d.setHours(0, 0, 0, 0);
-    return d;
-  }
-  if (range === "Last 7 Days") {
-    d.setDate(d.getDate() - 7);
-    return d;
-  }
-  if (range === "Last 1 Month") {
-    d.setMonth(d.getMonth() - 1);
-    return d;
-  }
-  return new Date(0); // All Time
-};
-
-const pct = (cur, prev) =>
-  prev > 0 ? +(((cur - prev) / prev) * 100).toFixed(1) : cur > 0 ? 100 : 0;
+const MODES = [
+  { key: "session", label: "Current Session" },
+  { key: "daily", label: "Daily" },
+  { key: "weekly", label: "Weekly" },
+  { key: "monthly", label: "Monthly" },
+  { key: "custom", label: "Custom" },
+];
 
 const Metrics = () => {
-  const [range, setRange] = useState("Last 1 Month");
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const [mode, setMode] = useState("session");
+  const [customFrom, setCustomFrom] = useState("");
+  const [customTo, setCustomTo] = useState("");
 
-  const { data: ordersRes } = useQuery({
-    queryKey: ["orders"],
-    queryFn: async () => getOrders(),
+  const range = useMemo(() => {
+    const end = new Date().toISOString();
+    if (mode === "daily") {
+      const d = new Date();
+      d.setHours(0, 0, 0, 0);
+      return { from: d.toISOString(), to: end };
+    }
+    if (mode === "weekly") {
+      const d = new Date();
+      d.setDate(d.getDate() - 7);
+      return { from: d.toISOString(), to: end };
+    }
+    if (mode === "monthly") {
+      const d = new Date();
+      d.setMonth(d.getMonth() - 1);
+      return { from: d.toISOString(), to: end };
+    }
+    if (mode === "custom") {
+      return {
+        from: customFrom ? new Date(customFrom).toISOString() : undefined,
+        to: customTo ? new Date(customTo + "T23:59:59").toISOString() : undefined,
+      };
+    }
+    return null;
+  }, [mode, customFrom, customTo]);
+
+  const { data: sessionRes } = useQuery({
+    queryKey: ["sessionSummary"],
+    queryFn: async () => getSessionSummary(),
+    placeholderData: keepPreviousData,
+  });
+
+  const { data: summaryRes } = useQuery({
+    queryKey: ["summary", mode, range?.from, range?.to],
+    queryFn: async () => getSummary(range),
+    enabled: mode !== "session" && !!range,
     placeholderData: keepPreviousData,
   });
 
@@ -40,152 +72,163 @@ const Metrics = () => {
     placeholderData: keepPreviousData,
   });
 
-  const { metrics, items } = useMemo(() => {
-    const orders = ordersRes?.data?.data || [];
-    const tables = tablesRes?.data?.data || [];
+  const sessionData = sessionRes?.data?.data;
+  const session = sessionData?.session || null;
+  const stats =
+    mode === "session" ? sessionData : summaryRes?.data?.data;
 
-    const start = rangeStart(range);
-    const now = new Date();
-    const periodMs = now.getTime() - start.getTime();
-    const prevStart = new Date(start.getTime() - periodMs);
+  const sessionMutation = useMutation({
+    mutationFn: (action) => (action === "open" ? openSession() : closeSession()),
+    onSuccess: (_res, action) => {
+      queryClient.invalidateQueries({ queryKey: ["sessionSummary"] });
+      enqueueSnackbar(action === "open" ? "Session opened!" : "Session closed!", { variant: "success" });
+    },
+    onError: (err) =>
+      enqueueSnackbar(err?.response?.data?.message || "Session action failed!", { variant: "error" }),
+  });
 
-    let revenue = 0;
-    let prevRevenue = 0;
-    let orderCount = 0;
-    let prevOrderCount = 0;
-    const customers = new Set();
+  const money = (n) => `Rs ${Number(n || 0).toFixed(0)}`;
 
-    orders.forEach((o) => {
-      const od = new Date(o.orderDate);
-      const amt = o.bills?.totalWithTax || 0;
-      if (od >= start) {
-        revenue += amt;
-        orderCount++;
-        if (o.customerDetails?.phone) customers.add(o.customerDetails.phone);
-      } else if (range !== "All Time" && od >= prevStart && od < start) {
-        prevRevenue += amt;
-        prevOrderCount++;
-      }
-    });
+  const cards = stats
+    ? [
+        { key: "revenue", title: "Total Revenue", value: money(stats.totalRevenue), color: "#e85d04" },
+        { key: "orders", title: "Total Orders", value: `${stats.totalOrders || 0}`, color: "#02ca3a" },
+        { key: "paid", title: "Paid Payments", value: `${stats.paidPayments || 0}`, color: "#025cca" },
+        { key: "pending", title: "Pending Payments", value: `${stats.pendingPayments || 0}`, color: "#f6b100" },
+        { key: "pendingAmount", title: "Pending Amount", value: money(stats.pendingAmount), color: "#d00000" },
+        { key: "discounts", title: "Discounts Given", value: money(stats.discountsGiven), color: "#7f167f" },
+        { key: "online", title: "Online Payments", value: money(stats.onlinePayments), color: "#285430" },
+        { key: "cash", title: "Cash Payments", value: money(stats.cashPayments), color: "#5b45b0" },
+      ]
+    : [];
 
-    const avg = orderCount > 0 ? revenue / orderCount : 0;
-    const prevAvg = prevOrderCount > 0 ? prevRevenue / prevOrderCount : 0;
-    const activeOrders = orders.filter(
-      (o) => o.orderStatus === "In Progress"
-    ).length;
-    const totalDishes = menus.reduce((s, m) => s + (m.items?.length || 0), 0);
+  // When a card is clicked, open its detail page scoped to the same range.
+  const openDetail = (cardKey) => {
+    const label =
+      mode === "session" ? "Current Session" : MODES.find((m) => m.key === mode)?.label;
+    const detailFrom = mode === "session" ? session?.opened_at : range?.from;
+    const detailTo = mode === "session" ? new Date().toISOString() : range?.to;
+    const qs = new URLSearchParams();
+    if (detailFrom) qs.set("from", detailFrom);
+    if (detailTo) qs.set("to", detailTo);
+    if (label) qs.set("label", label);
+    navigate(`/dashboard/metric/${cardKey}?${qs.toString()}`);
+  };
 
-    const trend = (p) => ({ percentage: `${p >= 0 ? "+" : ""}${p}%`, isIncrease: p >= 0 });
+  const items = [
+    { title: "Total Categories", value: `${menus.length}`, color: "#5b45b0" },
+    { title: "Total Dishes", value: `${menus.reduce((s, m) => s + (m.items?.length || 0), 0)}`, color: "#285430" },
+    { title: "Pending Orders", value: `${stats?.pendingPayments || 0}`, color: "#735f32" },
+    { title: "Total Tables", value: `${tablesRes?.data?.data?.length || 0}`, color: "#7f167f" },
+  ];
 
-    const metrics = [
-      { title: "Revenue", value: `Rs ${revenue.toFixed(0)}`, color: "#e85d04", ...trend(pct(revenue, prevRevenue)) },
-      { title: "Orders", value: `${orderCount}`, color: "#02ca3a", ...trend(pct(orderCount, prevOrderCount)) },
-      { title: "Total Customers", value: `${customers.size}`, color: "#f6b100", ...trend(0) },
-      { title: "Avg Order Value", value: `Rs ${avg.toFixed(0)}`, color: "#d00000", ...trend(pct(avg, prevAvg)) },
+  const exportCsv = () => {
+    if (!stats) return;
+    const label = mode === "session" ? "Current Session" : MODES.find((m) => m.key === mode)?.label;
+    const lines = [
+      ["Zair Zabar POS — Report", label],
+      ["Generated", new Date().toLocaleString()],
+      [],
+      ["Total Revenue", stats.totalRevenue],
+      ["Total Orders", stats.totalOrders],
+      ["Paid Payments", stats.paidPayments],
+      ["Pending Payments", stats.pendingPayments],
+      ["Pending Amount", stats.pendingAmount],
+      ["Discounts Given", stats.discountsGiven],
+      ["Online Payments", stats.onlinePayments],
+      ["Cash Payments", stats.cashPayments],
     ];
-
-    const items = [
-      { title: "Total Categories", value: `${menus.length}`, color: "#5b45b0", ...trend(0) },
-      { title: "Total Dishes", value: `${totalDishes}`, color: "#285430", ...trend(0) },
-      { title: "Active Orders", value: `${activeOrders}`, color: "#735f32", ...trend(0) },
-      { title: "Total Tables", value: `${tables.length}`, color: "#7f167f", ...trend(0) },
-    ];
-
-    return { metrics, items };
-  }, [ordersRes, tablesRes, range]);
+    const csv = lines.map((r) => r.join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `zair-zabar-report-${mode}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="container mx-auto py-2 px-6 md:px-4">
-      <div className="flex justify-between items-center">
+      {/* Session bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#1a1a1a] rounded-lg p-4 mb-6">
         <div>
-          <h2 className="font-semibold text-[#f5f5f5] text-xl">
-            Overall Performance
-          </h2>
-          <p className="text-sm text-[#ababab]">
-            Revenue, orders and customers for the selected period.
+          <p className="text-[#f5f5f5] font-semibold">
+            {session ? "🟢 Session Open" : "🔴 No Open Session"}
+          </p>
+          <p className="text-[#ababab] text-xs mt-1">
+            {session ? `Opened: ${formatDateAndTime(session.opened_at)}` : "Open a session to start tracking revenue."}
           </p>
         </div>
-        <select
-          value={range}
-          onChange={(e) => setRange(e.target.value)}
-          className="px-4 py-2 rounded-md text-[#f5f5f5] bg-[#1a1a1a] outline-none cursor-pointer"
+        <button
+          onClick={() => sessionMutation.mutate(session ? "close" : "open")}
+          disabled={sessionMutation.isPending}
+          className={`px-5 py-2 rounded-lg font-semibold text-sm text-white disabled:opacity-50 ${
+            session ? "bg-[#d00000]" : "bg-[#02ca3a]"
+          }`}
         >
-          {RANGES.map((r) => (
-            <option key={r} value={r}>
-              {r}
-            </option>
-          ))}
-        </select>
+          {session ? "Close Session" : "Open Session"}
+        </button>
       </div>
+
+      {/* Filters */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          {MODES.map((m) => (
+            <button
+              key={m.key}
+              onClick={() => setMode(m.key)}
+              className={`px-4 py-2 rounded-lg text-sm font-semibold ${
+                mode === m.key ? "bg-[#262626] text-white" : "bg-[#1a1a1a] text-[#ababab]"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+          {mode === "custom" && (
+            <>
+              <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)}
+                className="bg-[#1a1a1a] text-white text-sm rounded-lg px-3 py-2 outline-none" />
+              <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)}
+                className="bg-[#1a1a1a] text-white text-sm rounded-lg px-3 py-2 outline-none" />
+            </>
+          )}
+        </div>
+        <button onClick={exportCsv} className="bg-[#025cca] text-white px-4 py-2 rounded-lg text-sm font-semibold">
+          Export CSV
+        </button>
+      </div>
+
+      <h2 className="font-semibold text-[#f5f5f5] text-xl">Overall Performance</h2>
+      <p className="text-sm text-[#ababab]">
+        {mode === "session" ? "Revenue for the current business session." : `Showing: ${MODES.find((m) => m.key === mode)?.label}`}
+      </p>
 
       <div className="mt-6 grid grid-cols-4 gap-4">
-        {metrics.map((metric, index) => {
-          return (
-            <div
-              key={index}
-              className="shadow-sm rounded-lg p-4"
-              style={{ backgroundColor: metric.color }}
-            >
-              <div className="flex justify-between items-center">
-                <p className="font-medium text-xs text-[#f5f5f5]">
-                  {metric.title}
-                </p>
-                <div className="flex items-center gap-1">
-                  <svg
-                    className="w-3 h-3"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                    fill="none"
-                    style={{ color: metric.isIncrease ? "#f5f5f5" : "red" }}
-                  >
-                    <path
-                      d={metric.isIncrease ? "M5 15l7-7 7 7" : "M19 9l-7 7-7-7"}
-                    />
-                  </svg>
-                  <p
-                    className="font-medium text-xs"
-                    style={{ color: metric.isIncrease ? "#f5f5f5" : "red" }}
-                  >
-                    {metric.percentage}
-                  </p>
-                </div>
-              </div>
-              <p className="mt-1 font-semibold text-2xl text-[#f5f5f5]">
-                {metric.value}
-              </p>
-            </div>
-          );
-        })}
+        {cards.map((c) => (
+          <button
+            key={c.key}
+            onClick={() => openDetail(c.key)}
+            className="text-left shadow-sm rounded-lg p-4 transition-transform hover:scale-[1.02] hover:brightness-110 cursor-pointer"
+            style={{ backgroundColor: c.color }}
+          >
+            <p className="font-medium text-xs text-[#f5f5f5]">{c.title}</p>
+            <p className="mt-1 font-semibold text-2xl text-[#f5f5f5]">{c.value}</p>
+            <p className="text-[10px] text-[#f5f5f5] opacity-70 mt-2">Tap for details →</p>
+          </button>
+        ))}
       </div>
 
-      <div className="flex flex-col justify-between mt-12">
-        <div>
-          <h2 className="font-semibold text-[#f5f5f5] text-xl">
-            Item Details
-          </h2>
-          <p className="text-sm text-[#ababab]">
-            Catalog size and live order/table counts.
-          </p>
-        </div>
-
+      <div className="mt-12">
+        <h2 className="font-semibold text-[#f5f5f5] text-xl">Item Details</h2>
+        <p className="text-sm text-[#ababab]">Catalog size and live counts.</p>
         <div className="mt-6 grid grid-cols-4 gap-4">
-          {items.map((item, index) => {
-            return (
-              <div key={index} className="shadow-sm rounded-lg p-4" style={{ backgroundColor: item.color }}>
-                <div className="flex justify-between items-center">
-                  <p className="font-medium text-xs text-[#f5f5f5]">{item.title}</p>
-                  <div className="flex items-center gap-1">
-                    <svg className="w-3 h-3 text-white" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4" fill="none">
-                      <path d="M5 15l7-7 7 7" />
-                    </svg>
-                    <p className="font-medium text-xs text-[#f5f5f5]">{item.percentage}</p>
-                  </div>
-                </div>
-                <p className="mt-1 font-semibold text-2xl text-[#f5f5f5]">{item.value}</p>
-              </div>
-            );
-          })}
+          {items.map((c, i) => (
+            <div key={i} className="shadow-sm rounded-lg p-4" style={{ backgroundColor: c.color }}>
+              <p className="font-medium text-xs text-[#f5f5f5]">{c.title}</p>
+              <p className="mt-1 font-semibold text-2xl text-[#f5f5f5]">{c.value}</p>
+            </div>
+          ))}
         </div>
       </div>
     </div>

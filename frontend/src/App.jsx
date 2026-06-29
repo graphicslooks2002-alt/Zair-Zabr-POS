@@ -5,7 +5,7 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { Home, Auth, Orders, Tables, Menu, Dashboard } from "./pages";
+import { Home, Auth, Orders, Tables, Menu, Dashboard, CreateOrder, MetricDetail } from "./pages";
 import Header from "./components/shared/Header";
 import { useSelector } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
@@ -26,9 +26,9 @@ function Layout() {
         <Route
           path="/"
           element={
-            <ProtectedRoutes>
+            <AdminRoute>
               <Home />
-            </ProtectedRoutes>
+            </AdminRoute>
           }
         />
         <Route path="/auth" element={isAuth ? <Navigate to="/" /> : <Auth />} />
@@ -37,6 +37,14 @@ function Layout() {
           element={
             <ProtectedRoutes>
               <Orders />
+            </ProtectedRoutes>
+          }
+        />
+        <Route
+          path="/orders/new"
+          element={
+            <ProtectedRoutes>
+              <CreateOrder />
             </ProtectedRoutes>
           }
         />
@@ -59,9 +67,17 @@ function Layout() {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoutes>
+            <AdminRoute>
               <Dashboard />
-            </ProtectedRoutes>
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/dashboard/metric/:key"
+          element={
+            <AdminRoute>
+              <MetricDetail />
+            </AdminRoute>
           }
         />
         <Route path="*" element={<div>Not Found</div>} />
@@ -76,6 +92,18 @@ function ProtectedRoutes({ children }) {
     return <Navigate to="/auth" />;
   }
 
+  return children;
+}
+
+// Admin-only pages (statistics / dashboard). Non-admins are sent to Orders.
+function AdminRoute({ children }) {
+  const { isAuth, role } = useSelector((state) => state.user);
+  if (!isAuth) {
+    return <Navigate to="/auth" />;
+  }
+  if (role !== "Admin") {
+    return <Navigate to="/orders" />;
+  }
   return children;
 }
 
