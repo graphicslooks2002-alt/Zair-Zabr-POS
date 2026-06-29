@@ -34,7 +34,15 @@ const ManageStaff = () => {
   const submit = (e) => {
     e.preventDefault();
     if (addMutation.isPending) return;
-    addMutation.mutate(form);
+
+    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim());
+    const phoneOk = /^0\d{10}$/.test(form.phone.replace(/[\s-]/g, ""));
+    if (!form.name.trim()) return enqueueSnackbar("Name is required.", { variant: "warning" });
+    if (!emailOk) return enqueueSnackbar("Please enter a valid email address.", { variant: "warning" });
+    if (!phoneOk) return enqueueSnackbar("Phone must be 11 digits, e.g. 03001234567.", { variant: "warning" });
+    if (form.password.length < 6) return enqueueSnackbar("Password must be at least 6 characters.", { variant: "warning" });
+
+    addMutation.mutate({ ...form, email: form.email.trim().toLowerCase() });
   };
 
   const rows = resData?.data?.data || [];
@@ -99,8 +107,9 @@ const ManageStaff = () => {
               <input type="email" value={form.email} onChange={set("email")} placeholder="Email" required
                 className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
               <input value={form.phone} onChange={set("phone")} placeholder="Phone (e.g. 03001234567)" required
+                inputMode="numeric" maxLength={11} pattern="0[0-9]{10}" title="11 digits starting with 0"
                 className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
-              <input type="password" value={form.password} onChange={set("password")} placeholder="Password (min 6 chars)" required
+              <input type="password" value={form.password} onChange={set("password")} placeholder="Password (min 6 chars)" required minLength={6}
                 className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
               <div>
                 <label className="block text-[#ababab] text-xs mb-1">Role</label>

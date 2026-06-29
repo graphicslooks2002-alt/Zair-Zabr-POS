@@ -1,5 +1,6 @@
 const createHttpError = require("http-errors");
 const supabase = require("../config/supabase");
+const { isPositiveInt } = require("../utils/validate");
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -11,8 +12,11 @@ const TABLE_SELECT =
 const addTable = async (req, res, next) => {
   try {
     const { tableNo, seats } = req.body;
-    if (!tableNo) {
-      return next(createHttpError(400, "Please provide table No!"));
+    if (!isPositiveInt(tableNo)) {
+      return next(createHttpError(400, "Table number must be a positive whole number."));
+    }
+    if (!isPositiveInt(seats)) {
+      return next(createHttpError(400, "Seats must be a positive whole number."));
     }
 
     const { data: existing } = await supabase

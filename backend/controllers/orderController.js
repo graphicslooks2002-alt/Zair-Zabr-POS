@@ -1,6 +1,7 @@
 const createHttpError = require("http-errors");
 const supabase = require("../config/supabase");
 const { findOpenSession } = require("./sessionController");
+const { isNonNegativeNumber } = require("../utils/validate");
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -23,6 +24,17 @@ const addOrder = async (req, res, next) => {
       notes,
       table,
     } = req.body;
+
+    // Validate the essentials.
+    if (!customerDetails || !customerDetails.name) {
+      return next(createHttpError(400, "Customer name is required."));
+    }
+    if (!Array.isArray(items) || items.length === 0) {
+      return next(createHttpError(400, "Order must contain at least one item."));
+    }
+    if (!bills || !isNonNegativeNumber(bills.totalWithTax)) {
+      return next(createHttpError(400, "Invalid bill total."));
+    }
 
     // Link the order to the currently open business session (if any).
     const session = await findOpenSession();

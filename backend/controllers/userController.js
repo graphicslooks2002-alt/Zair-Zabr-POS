@@ -4,6 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 const { ROLES } = require("../middlewares/authorize");
+const { isEmail, isPhone } = require("../utils/validate");
 
 const publicUser = (u) => ({
   _id: u.id,
@@ -32,6 +33,12 @@ const register = async (req, res, next) => {
 
     email = String(email).trim().toLowerCase();
 
+    if (!isEmail(email)) {
+      return next(createHttpError(400, "Please enter a valid email address."));
+    }
+    if (!isPhone(phone)) {
+      return next(createHttpError(400, "Phone must be 11 digits, e.g. 03001234567."));
+    }
     if (password.length < 6) {
       return next(createHttpError(400, "Password must be at least 6 characters."));
     }
@@ -82,6 +89,10 @@ const login = async (req, res, next) => {
     }
 
     email = String(email).trim().toLowerCase();
+
+    if (!isEmail(email)) {
+      return next(createHttpError(400, "Please enter a valid email address."));
+    }
 
     const { data: user } = await supabase
       .from("users")
