@@ -1,6 +1,6 @@
 const createHttpError = require("http-errors");
 const supabase = require("../config/supabase");
-const { findOpenSession } = require("./sessionController");
+const { getCurrentSessionWindow } = require("./sessionController");
 
 // Each report just reads a Postgres view (see db-schema/analytics_views.sql).
 const fromView = (view) => async (req, res, next) => {
@@ -78,20 +78,23 @@ const getSummary = async (req, res, next) => {
   }
 };
 
-// GET /api/report/session  — summary for the current open session.
+// GET /api/report/session — summary for the current automatic session (12 PM–4 AM PKT).
 const getSessionSummary = async (req, res, next) => {
   try {
-    const session = await findOpenSession();
-    if (!session) {
-      return res.status(200).json({
-        success: true,
-        data: { session: null, ...computeStats([]) },
-      });
-    }
-    const orders = await fetchOrdersBetween(session.opened_at, null);
+    const { start, end } = getCurrentSessionWindow();
+    const orders = await fetchOrdersBetween(start.toISOString(), end.toISOString());
     res.status(200).json({
       success: true,
-      data: { session, ...computeStats(orders) },
+      data: {
+        session: {
+          auto: true,
+          opened_at: start.toISOString(),
+          closes_at: end.toISOString(),
+          active: Date.now() < end.getTime(),
+          label: "12:00 PM – 4:00 AM",
+        },
+        ...computeStats(orders),
+      },
     });
   } catch (error) {
     next(error);

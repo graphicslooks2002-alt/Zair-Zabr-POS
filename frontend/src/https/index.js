@@ -29,16 +29,24 @@ export const updateOrderStatus = ({ orderId, orderStatus }) =>
 export const settleOrder = (orderId) =>
   axiosWrapper.put(`/api/order/${orderId}/settle`);
 
-// Session Endpoints
+// Session Endpoints (session is automatic: 12 PM – 4 AM)
 export const getCurrentSession = () => axiosWrapper.get("/api/session/current");
-export const openSession = () => axiosWrapper.post("/api/session/open");
-export const closeSession = () => axiosWrapper.post("/api/session/close");
 
 // Pending Payment Endpoints
 export const getPendingPayments = (status) =>
   axiosWrapper.get("/api/pending", { params: status ? { status } : {} });
 export const settlePending = (id) =>
   axiosWrapper.put(`/api/pending/${id}/settle`);
+
+// Menu Endpoints (read = any user; writes = Admin)
+export const getMenu = () => axiosWrapper.get("/api/menu");
+export const seedMenu = (categories) => axiosWrapper.post("/api/menu/seed", { categories });
+export const addCategory = (data) => axiosWrapper.post("/api/menu/category", data);
+export const updateCategory = (id, data) => axiosWrapper.put(`/api/menu/category/${id}`, data);
+export const deleteCategory = (id) => axiosWrapper.delete(`/api/menu/category/${id}`);
+export const addProduct = (data) => axiosWrapper.post("/api/menu/product", data);
+export const updateProduct = (id, data) => axiosWrapper.put(`/api/menu/product/${id}`, data);
+export const deleteProduct = (id) => axiosWrapper.delete(`/api/menu/product/${id}`);
 
 // Report Endpoints
 export const getSessionSummary = () => axiosWrapper.get("/api/report/session");

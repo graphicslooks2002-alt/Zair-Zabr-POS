@@ -1,6 +1,5 @@
 const createHttpError = require("http-errors");
 const supabase = require("../config/supabase");
-const { findOpenSession } = require("./sessionController");
 const { isNonNegativeNumber } = require("../utils/validate");
 
 const UUID_RE =
@@ -30,14 +29,11 @@ const addOrder = async (req, res, next) => {
       return next(createHttpError(400, "Customer name is required."));
     }
     if (!Array.isArray(items) || items.length === 0) {
-      return next(createHttpError(400, "Order must contain at least one item."));
+      return next(createHttpError(400, "Please select a product before placing the order."));
     }
     if (!bills || !isNonNegativeNumber(bills.totalWithTax)) {
-      return next(createHttpError(400, "Invalid bill total."));
+      return next(createHttpError(400, "Something's wrong with the order total. Please review and try again."));
     }
-
-    // Link the order to the currently open business session (if any).
-    const session = await findOpenSession();
 
     const { data, error } = await supabase
       .from("orders")
@@ -53,7 +49,6 @@ const addOrder = async (req, res, next) => {
         discount_amount: discount?.amount || 0,
         notes: notes || null,
         table_id: table || null,
-        session_id: session?.id || null,
       })
       .select(ORDER_SELECT)
       .single();

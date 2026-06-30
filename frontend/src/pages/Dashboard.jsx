@@ -5,6 +5,7 @@ import Metrics from "../components/dashboard/Metrics";
 import RecentOrders from "../components/dashboard/RecentOrders";
 import PendingPayments from "../components/dashboard/PendingPayments";
 import ManageStaff from "../components/dashboard/ManageStaff";
+import MenuManagement from "../components/dashboard/MenuManagement";
 import Modal from "../components/dashboard/Modal";
 import BottomNav from "../components/shared/BottomNav";
 
@@ -14,7 +15,7 @@ const buttons = [
   { label: "Add Dishes", icon: <BiSolidDish />, action: "dishes" },
 ];
 
-const tabs = ["Metrics", "Orders", "Payments", "Staff"];
+const tabs = ["Metrics", "Orders", "Payments", "Staff", "Menu"];
 
 const Dashboard = () => {
   useEffect(() => {
@@ -65,6 +66,7 @@ const Dashboard = () => {
         {activeTab === "Orders" && <RecentOrders />}
         {activeTab === "Payments" && <PendingPayments />}
         {activeTab === "Staff" && <ManageStaff />}
+        {activeTab === "Menu" && <MenuManagement />}
       </div>
 
       {isTableModalOpen && (

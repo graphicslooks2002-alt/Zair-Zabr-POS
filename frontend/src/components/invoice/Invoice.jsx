@@ -33,7 +33,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
         <div class="title">ZAIR ZABAR</div>
         <div class="muted">Vital Market 50 Wala Road, Near Sarim Hospital, Haroonabad</div>
         <div class="muted">Cell #: 03194562211</div>
-        <div class="muted">Timing: 12:00 PM - 12:00 AM</div>
+        <div class="muted">Timing: 12:00 PM - 4:00 AM</div>
       </div>
       <div class="divider"></div>
       <div class="row"><span>Bill #: ${orderInfo._id ? orderInfo._id.slice(-6).toUpperCase() : "—"}</span><span>${formatDateAndTime(orderInfo.orderDate)}</span></div>
@@ -47,7 +47,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
       <div class="divider"></div>
       <div class="row"><span>Total Items: ${items.length}</span><span>Gross: ${Number(bills.total || 0).toFixed(0)}</span></div>
       ${bills.discount > 0 ? `<div class="row"><span></span><span>Discount: ${Number(bills.discount).toFixed(0)}</span></div>` : ""}
-      <div class="totalbar"><span>Total Bill</span><span>Rs ${Number(bills.totalWithTax || 0).toFixed(0)}</span></div>
+      <div class="totalbar"><span>TOTAL BILL</span><span>Rs ${Number(bills.totalWithTax || 0).toFixed(0)}</span></div>
       <div class="row pay"><span>Payment: ${orderInfo.paymentMethod || "—"}${orderInfo.paymentStatus ? " · " + orderInfo.paymentStatus : ""}</span></div>
       ${orderInfo.notes ? `<div class="row"><span>Notes: ${orderInfo.notes}</span></div>` : ""}
       <div class="divider"></div>
@@ -63,20 +63,20 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             * { box-sizing: border-box; }
             body { font-family: 'Courier New', monospace; width: 300px; margin: 0 auto; padding: 12px; color: #000; }
             .center { text-align: center; }
-            .title { font-size: 20px; font-weight: bold; letter-spacing: 2px; }
-            .muted { font-size: 10px; line-height: 1.4; }
-            .divider { border-top: 1px dashed #000; margin: 6px 0; }
+            .title { font-size: 22px; font-weight: bold; letter-spacing: 3px; }
+            .muted { font-size: 10px; line-height: 1.45; }
+            .divider { border-top: 1px dashed #000; margin: 7px 0; }
             .row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; margin: 3px 0; }
             table.items { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 12px; }
-            table.items th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 3px 2px; text-align: left; }
-            table.items td { padding: 2px; vertical-align: top; }
+            table.items th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 2px; text-align: left; font-weight: bold; }
+            table.items td { padding: 3px 2px; vertical-align: top; }
             .qty { width: 28px; }
             .num { text-align: right; white-space: nowrap; }
             .name { text-align: left; }
-            .totalbar { display: flex; justify-content: space-between; background: #000; color: #fff; font-weight: bold; font-size: 15px; padding: 5px 8px; margin: 6px 0; }
-            .pay { font-size: 12px; }
-            .urdu-block { margin-top: 6px; direction: rtl; }
-            .urdu { font-size: 12px; text-align: right; line-height: 1.7; }
+            .totalbar { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 17px; padding: 6px 2px; margin: 4px 0; border-top: 3px double #000; border-bottom: 3px double #000; }
+            .pay { font-size: 12px; margin-top: 4px; }
+            .urdu-block { margin-top: 8px; direction: rtl; }
+            .urdu { font-size: 12px; text-align: center; line-height: 1.9; }
           </style>
         </head>
         <body>${html}</body>
@@ -101,7 +101,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             <h2 className="text-xl font-bold tracking-widest">ZAIR ZABAR</h2>
             <p className="text-[10px] leading-tight mt-1">Vital Market 50 Wala Road, Near Sarim Hospital, Haroonabad</p>
             <p className="text-[10px]">Cell #: 03194562211</p>
-            <p className="text-[10px]">Timing: 12:00 PM - 12:00 AM</p>
+            <p className="text-[10px]">Timing: 12:00 PM - 4:00 AM</p>
           </div>
 
           <div className="border-t border-dashed border-gray-500 my-2" />
@@ -149,9 +149,9 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             </div>
           )}
 
-          {/* Total bill highlighted */}
-          <div className="flex justify-between items-center bg-black text-white font-bold text-base px-3 py-1.5 my-2">
-            <span>Total Bill</span>
+          {/* Total bill — bold double rule (thermal-friendly) */}
+          <div className="flex justify-between items-center font-bold text-lg py-2 my-2 border-y-[3px] border-double border-black">
+            <span>TOTAL BILL</span>
             <span>Rs {Number(bills.totalWithTax || 0).toFixed(0)}</span>
           </div>
 
@@ -161,11 +161,12 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
           <div className="border-t border-dashed border-gray-500 my-2" />
 
           {/* Urdu footer */}
-          <div dir="rtl" className="space-y-1">
+          <div dir="rtl" className="space-y-1.5">
             {URDU_NOTES.map((n, i) => (
-              <p key={i} className="text-xs text-right leading-relaxed">{n}</p>
+              <p key={i} className="text-xs text-center leading-relaxed">{n}</p>
             ))}
           </div>
+          <p className="text-center text-[11px] text-gray-500 mt-3">— Thank you, visit again —</p>
         </div>
 
         <div className="flex gap-2 p-3 border-t shrink-0">

@@ -28,7 +28,7 @@ const register = async (req, res, next) => {
     let { email, role } = req.body;
 
     if (!name || !phone || !email || !password || !role) {
-      return next(createHttpError(400, "All fields are required!"));
+      return next(createHttpError(400, "Please fill in all the required fields."));
     }
 
     email = String(email).trim().toLowerCase();
@@ -57,7 +57,7 @@ const register = async (req, res, next) => {
       .maybeSingle();
 
     if (existing) {
-      return next(createHttpError(400, "User already exist!"));
+      return next(createHttpError(400, "An account with this email already exists."));
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -85,7 +85,7 @@ const login = async (req, res, next) => {
     const { password } = req.body;
 
     if (!email || !password) {
-      return next(createHttpError(400, "All fields are required!"));
+      return next(createHttpError(400, "Please fill in all the required fields."));
     }
 
     email = String(email).trim().toLowerCase();
@@ -101,12 +101,12 @@ const login = async (req, res, next) => {
       .maybeSingle();
 
     if (!user) {
-      return next(createHttpError(401, "Invalid Credentials"));
+      return next(createHttpError(401, "Incorrect email or password."));
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return next(createHttpError(401, "Invalid Credentials"));
+      return next(createHttpError(401, "Incorrect email or password."));
     }
 
     const accessToken = jwt.sign(

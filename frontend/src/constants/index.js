@@ -34,33 +34,33 @@ export const pizzaRegular = [
 export const pizzaSpecial = [
   { id: 1, name: "Behari Kabab Pizza (S)", price: 500 },
   { id: 2, name: "Behari Kabab Pizza (M)", price: 1050 },
-  { id: 3, name: "Behari Kabab Pizza (L)", price: 1400 },
+  { id: 3, name: "Behari Kabab Pizza (L)", price: 1500 },
   { id: 4, name: "Behari Kabab Pizza (XL)", price: 2100 },
   { id: 5, name: "Crown Crust Pizza (M)", price: 1050 },
-  { id: 6, name: "Crown Crust Pizza (L)", price: 1400 },
+  { id: 6, name: "Crown Crust Pizza (L)", price: 1500 },
   { id: 7, name: "Crown Crust Pizza (XL)", price: 2100 },
   { id: 8, name: "Lazania Pizza (M)", price: 1050 },
-  { id: 9, name: "Lazania Pizza (L)", price: 1400 },
+  { id: 9, name: "Lazania Pizza (L)", price: 1500 },
   { id: 10, name: "Lazania Pizza (XL)", price: 2100 },
   { id: 11, name: "Malai Botti Pizza (S)", price: 500 },
   { id: 12, name: "Malai Botti Pizza (M)", price: 1050 },
-  { id: 13, name: "Malai Botti Pizza (L)", price: 1400 },
+  { id: 13, name: "Malai Botti Pizza (L)", price: 1500 },
   { id: 14, name: "Malai Botti Pizza (XL)", price: 2100 },
   { id: 15, name: "New Year Pizza (S)", price: 500 },
   { id: 16, name: "New Year Pizza (M)", price: 1050 },
-  { id: 17, name: "New Year Pizza (L)", price: 1400 },
+  { id: 17, name: "New Year Pizza (L)", price: 1500 },
   { id: 18, name: "New Year Pizza (XL)", price: 2100 },
   { id: 19, name: "Chicken Lover Pizza (S)", price: 500 },
   { id: 20, name: "Chicken Lover Pizza (M)", price: 1050 },
-  { id: 21, name: "Chicken Lover Pizza (L)", price: 1400 },
+  { id: 21, name: "Chicken Lover Pizza (L)", price: 1500 },
   { id: 22, name: "Chicken Lover Pizza (XL)", price: 2100 },
   { id: 23, name: "Steam Pizza (S)", price: 500 },
   { id: 24, name: "Steam Pizza (M)", price: 1050 },
-  { id: 25, name: "Steam Pizza (L)", price: 1400 },
+  { id: 25, name: "Steam Pizza (L)", price: 1500 },
   { id: 26, name: "Steam Pizza (XL)", price: 2100 },
   { id: 27, name: "Zair Zabr Special (S)", price: 550 },
   { id: 28, name: "Zair Zabr Special (M)", price: 1150 },
-  { id: 29, name: "Zair Zabr Special (L)", price: 1400 },
+  { id: 29, name: "Zair Zabr Special (L)", price: 1500 },
   { id: 30, name: "Zair Zabr Special (XL)", price: 2200 },
 ];
 
@@ -187,6 +187,23 @@ export const specialDeals = [
   { id: 16, name: "Quick Bite Deal (1 Pasta, 5 Nuggets/Wings, Regular Drink)", price: 750 },
 ];
 
+// ============ DRINKS ============
+export const drinks = [
+  { id: 1, name: "Regular Drink", price: 70 },
+  { id: 2, name: "500ml Drink", price: 120 },
+  { id: 3, name: "1 Litre (Local)", price: 120 },
+  { id: 4, name: "1 Litre (Coke/Pepsi)", price: 160 },
+  { id: 5, name: "1.5 Litre (Local)", price: 170 },
+  { id: 6, name: "1.5 Litre (Coke/Pepsi)", price: 200 },
+  { id: 7, name: "2.25 Litre (Local)", price: 200 },
+  { id: 8, name: "2.25 Litre (Coke/Pepsi)", price: 230 },
+];
+
+// ============ SAUCES ============
+export const sauces = [
+  { id: 1, name: "Dip Sauce", price: 60 },
+];
+
 // ============ MENU CATEGORIES ============
 export const menus = [
   { id: 1, name: "Pizza Regular", bgColor: "#e85d04", icon: "🍕", items: pizzaRegular },
@@ -201,7 +218,9 @@ export const menus = [
   { id: 10, name: "Fries", bgColor: "#e85d04", icon: "🍟", items: fries },
   { id: 11, name: "Wraps", bgColor: "#735f32", icon: "🌯", items: wraps },
   { id: 12, name: "Shakes & Juices", bgColor: "#285430", icon: "🥤", items: shakesJuices },
-  { id: 13, name: "Special Deals", bgColor: "#d00000", icon: "🎉", items: specialDeals },
+  { id: 13, name: "Drinks", bgColor: "#025cca", icon: "🥤", items: drinks },
+  { id: 14, name: "Sauces", bgColor: "#b73e3e", icon: "🥫", items: sauces },
+  { id: 15, name: "Special Deals", bgColor: "#d00000", icon: "🎉", items: specialDeals },
 ];
 
 // ============ POPULAR DISHES (for Home dashboard) ============

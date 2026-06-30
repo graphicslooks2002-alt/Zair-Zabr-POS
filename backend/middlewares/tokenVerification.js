@@ -7,7 +7,7 @@ const isVerifiedUser = async (req, res, next) => {
     const { accessToken } = req.cookies;
 
     if (!accessToken) {
-      return next(createHttpError(401, "Please provide token!"));
+      return next(createHttpError(401, "Please log in to continue."));
     }
 
     // Trust the signed JWT — no DB round-trip per request. The token carries
@@ -17,7 +17,7 @@ const isVerifiedUser = async (req, res, next) => {
     req.user = { _id: decodeToken._id, role: decodeToken.role };
     next();
   } catch (error) {
-    next(createHttpError(401, "Invalid Token!"));
+    next(createHttpError(401, "Your session has expired. Please log in again."));
   }
 };
 

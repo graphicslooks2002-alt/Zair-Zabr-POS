@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { FaPlus, FaTimes } from "react-icons/fa";
@@ -12,12 +12,23 @@ const ManageStaff = () => {
   const [showModal, setShowModal] = useState(false);
   const [form, setForm] = useState(empty);
 
-  const { data: resData, isError } = useQuery({
+  const { data: resData, isError, error } = useQuery({
     queryKey: ["users"],
     queryFn: async () => getUsers(),
     placeholderData: keepPreviousData,
+    retry: false,
   });
-  if (isError) enqueueSnackbar("Failed to load staff!", { variant: "error" });
+
+  // Show the load error once (not on every render).
+  useEffect(() => {
+    if (isError) {
+      const msg =
+        error?.response?.status === 403
+          ? "Session outdated — please log out and log in again."
+          : error?.response?.data?.message || "Failed to load staff!";
+      enqueueSnackbar(msg, { variant: "error" });
+    }
+  }, [isError, error]);
 
   const addMutation = useMutation({
     mutationFn: (data) => register(data),

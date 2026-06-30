@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { FaPlus, FaMinus, FaTrash, FaSearch, FaArrowLeft, FaChair } from "react-icons/fa";
-import { menus } from "../constants";
-import { addOrder, updateTable } from "../https/index";
+import { menus as defaultMenu } from "../constants";
+import { addOrder, updateTable, getMenu } from "../https/index";
 import Invoice from "../components/invoice/Invoice";
 
 const CreateOrder = () => {
@@ -22,8 +22,22 @@ const CreateOrder = () => {
   const [orderType, setOrderType] = useState("Dine In");
   const [notes, setNotes] = useState("");
   const [cart, setCart] = useState([]);
-  const [activeCategory, setActiveCategory] = useState(menus[0]);
+  const [activeCategory, setActiveCategory] = useState(null);
   const [search, setSearch] = useState("");
+
+  // Live menu from DB; fall back to the bundled default until the DB is seeded.
+  const { data: menuRes } = useQuery({
+    queryKey: ["menu"],
+    queryFn: async () => getMenu(),
+    placeholderData: keepPreviousData,
+  });
+  const menus = menuRes?.data?.data?.length ? menuRes.data.data : defaultMenu;
+  useEffect(() => {
+    setActiveCategory((cur) => {
+      if (cur && menus.some((m) => m.id === cur.id)) return cur;
+      return menus[0] || null;
+    });
+  }, [menus]);
   const [discountType, setDiscountType] = useState("percent");
   const [discountValue, setDiscountValue] = useState(0);
   const [payChoice, setPayChoice] = useState("Cash");
@@ -65,7 +79,7 @@ const CreateOrder = () => {
   const q = search.trim().toLowerCase();
   const visibleItems = q
     ? allItems.filter((i) => i.name.toLowerCase().includes(q))
-    : activeCategory.items;
+    : activeCategory?.items || [];
 
   // ---- cart ops ----
   const addItem = (item) => {
@@ -124,7 +138,7 @@ const CreateOrder = () => {
       setShowInvoice(true);
     },
     onError: (err) =>
-      enqueueSnackbar(err?.response?.data?.message || "Failed to create order!", { variant: "error" }),
+      enqueueSnackbar(err?.response?.data?.message || "Could not place the order. Please try again.", { variant: "error" }),
   });
 
   const buildPayload = (paymentStatus, paymentMethod) => ({
@@ -149,7 +163,7 @@ const CreateOrder = () => {
   const place = (paymentStatus, paymentMethod) => {
     if (orderMutation.isPending) return;
     if (cart.length === 0) {
-      enqueueSnackbar("Add at least one item!", { variant: "warning" });
+      enqueueSnackbar("Please select a product before placing the order.", { variant: "warning" });
       return;
     }
     orderMutation.mutate(buildPayload(paymentStatus, paymentMethod));
@@ -157,7 +171,7 @@ const CreateOrder = () => {
 
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
-      enqueueSnackbar("Add at least one item!", { variant: "warning" });
+      enqueueSnackbar("Please select a product before placing the order.", { variant: "warning" });
       return;
     }
     if (payChoice === "Online") return setShowOnlineConfirm(true);
@@ -196,9 +210,9 @@ const CreateOrder = () => {
                 key={m.id}
                 onClick={() => setActiveCategory(m)}
                 className={`px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap ${
-                  activeCategory.id === m.id ? "text-white" : "bg-[#1a1a1a] text-[#ababab]"
+                  activeCategory?.id === m.id ? "text-white" : "bg-[#1a1a1a] text-[#ababab]"
                 }`}
-                style={{ backgroundColor: activeCategory.id === m.id ? m.bgColor : undefined }}
+                style={{ backgroundColor: activeCategory?.id === m.id ? m.bgColor : undefined }}
               >
                 {m.icon} {m.name}
               </button>
@@ -215,7 +229,7 @@ const CreateOrder = () => {
                 const inCart = cart.find((c) => c.name === cleanName(item.name));
                 return (
                   <button
-                    key={`${item.cat || activeCategory.name}-${item.id}`}
+                    key={`${item.cat || activeCategory?.name}-${item.id}`}
                     onClick={() => addItem(item)}
                     className="relative bg-[#262626] hover:bg-[#2e2e2e] rounded-lg p-3 text-left"
                   >

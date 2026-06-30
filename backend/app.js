@@ -44,6 +44,7 @@ app.use("/api/payment", require("./routes/paymentRoute"));
 app.use("/api/report", require("./routes/reportRoute"));
 app.use("/api/session", require("./routes/sessionRoute"));
 app.use("/api/pending", require("./routes/pendingRoute"));
+app.use("/api/menu", require("./routes/menuRoute"));
 
 // Global Error Handler
 app.use(globalErrorHandler);

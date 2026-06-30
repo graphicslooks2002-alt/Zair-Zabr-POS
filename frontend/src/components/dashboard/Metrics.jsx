@@ -1,15 +1,8 @@
 import React, { useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { enqueueSnackbar } from "notistack";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { menus } from "../../constants";
-import {
-  getSessionSummary,
-  getSummary,
-  getTables,
-  openSession,
-  closeSession,
-} from "../../https/index";
+import { getSessionSummary, getSummary, getTables } from "../../https/index";
 import { formatDateAndTime } from "../../utils/index";
 
 const MODES = [
@@ -21,7 +14,6 @@ const MODES = [
 ];
 
 const Metrics = () => {
-  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const [mode, setMode] = useState("session");
   const [customFrom, setCustomFrom] = useState("");
@@ -76,16 +68,6 @@ const Metrics = () => {
   const session = sessionData?.session || null;
   const stats =
     mode === "session" ? sessionData : summaryRes?.data?.data;
-
-  const sessionMutation = useMutation({
-    mutationFn: (action) => (action === "open" ? openSession() : closeSession()),
-    onSuccess: (_res, action) => {
-      queryClient.invalidateQueries({ queryKey: ["sessionSummary"] });
-      enqueueSnackbar(action === "open" ? "Session opened!" : "Session closed!", { variant: "success" });
-    },
-    onError: (err) =>
-      enqueueSnackbar(err?.response?.data?.message || "Session action failed!", { variant: "error" }),
-  });
 
   const money = (n) => `Rs ${Number(n || 0).toFixed(0)}`;
 
@@ -150,25 +132,19 @@ const Metrics = () => {
 
   return (
     <div className="container mx-auto py-2 px-6 md:px-4">
-      {/* Session bar */}
+      {/* Session bar — automatic 12 PM – 4 AM business session */}
       <div className="flex flex-wrap items-center justify-between gap-3 bg-[#1a1a1a] rounded-lg p-4 mb-6">
         <div>
           <p className="text-[#f5f5f5] font-semibold">
-            {session ? "🟢 Session Open" : "🔴 No Open Session"}
+            {session?.active ? "🟢 Session Active" : "🌙 Between Sessions"} · Daily 12:00 PM – 4:00 AM
           </p>
           <p className="text-[#ababab] text-xs mt-1">
-            {session ? `Opened: ${formatDateAndTime(session.opened_at)}` : "Open a session to start tracking revenue."}
+            {session
+              ? `This session: ${formatDateAndTime(session.opened_at)} → ${formatDateAndTime(session.closes_at)}`
+              : "Automatic business session."}
           </p>
         </div>
-        <button
-          onClick={() => sessionMutation.mutate(session ? "close" : "open")}
-          disabled={sessionMutation.isPending}
-          className={`px-5 py-2 rounded-lg font-semibold text-sm text-white disabled:opacity-50 ${
-            session ? "bg-[#d00000]" : "bg-[#02ca3a]"
-          }`}
-        >
-          {session ? "Close Session" : "Open Session"}
-        </button>
+        <span className="text-[#ababab] text-xs bg-[#262626] px-3 py-2 rounded-lg">Auto</span>
       </div>
 
       {/* Filters */}

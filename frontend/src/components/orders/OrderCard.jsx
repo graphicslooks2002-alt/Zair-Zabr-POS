@@ -21,7 +21,7 @@ const OrderCard = ({ order }) => {
       queryClient.invalidateQueries({ queryKey: ["sessionSummary"] });
       enqueueSnackbar("Payment settled!", { variant: "success" });
     },
-    onError: () => enqueueSnackbar("Failed to settle!", { variant: "error" }),
+    onError: () => enqueueSnackbar("Could not mark the payment as paid. Please try again.", { variant: "error" }),
   });
 
   return (
