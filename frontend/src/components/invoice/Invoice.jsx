@@ -60,23 +60,29 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
         <head>
           <title>Zair Zabar - Receipt</title>
           <style>
-            * { box-sizing: border-box; }
-            body { font-family: 'Courier New', monospace; width: 300px; margin: 0 auto; padding: 12px; color: #000; }
+            /* Optimized for 80mm thermal (SPEED-X SP-210UL). 1-bit printer:
+               no antialiasing (avoids gray/shadowy edges), normal weight, mm/pt sizing. */
+            @page { size: 80mm auto; margin: 0; }
+            * { box-sizing: border-box; -webkit-font-smoothing: none; -moz-osx-font-smoothing: unset; text-rendering: optimizeLegibility; }
+            html, body { margin: 0; padding: 0; }
+            body { width: 72mm; margin: 0 auto; padding: 2mm 2mm 5mm; color: #000; background: #fff;
+                   font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-variant-numeric: tabular-nums;
+                   font-size: 11pt; line-height: 1.35; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .center { text-align: center; }
-            .title { font-size: 22px; font-weight: bold; letter-spacing: 3px; }
-            .muted { font-size: 10px; line-height: 1.45; }
-            .divider { border-top: 1px dashed #000; margin: 7px 0; }
-            .row { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; margin: 3px 0; }
-            table.items { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 12px; }
-            table.items th { border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 4px 2px; text-align: left; font-weight: bold; }
-            table.items td { padding: 3px 2px; vertical-align: top; }
-            .qty { width: 28px; }
+            .title { font-size: 16pt; font-weight: 700; letter-spacing: 0.5pt; }
+            .muted { font-size: 8.5pt; line-height: 1.3; }
+            .divider { border-top: 1px dashed #000; margin: 2mm 0; }
+            .row { display: flex; justify-content: space-between; gap: 3mm; font-size: 10pt; margin: 1mm 0; }
+            table.items { width: 100%; border-collapse: collapse; margin: 1.5mm 0; font-size: 10pt; }
+            table.items th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1mm 0.5mm; text-align: left; font-weight: 700; }
+            table.items td { padding: 0.9mm 0.5mm; vertical-align: top; }
+            .qty { width: 7mm; }
             .num { text-align: right; white-space: nowrap; }
             .name { text-align: left; }
-            .totalbar { display: flex; justify-content: space-between; align-items: center; font-weight: bold; font-size: 17px; padding: 6px 2px; margin: 4px 0; border-top: 3px double #000; border-bottom: 3px double #000; }
-            .pay { font-size: 12px; margin-top: 4px; }
-            .urdu-block { margin-top: 8px; direction: rtl; }
-            .urdu { font-size: 12px; text-align: center; line-height: 1.9; }
+            .totalbar { display: flex; justify-content: space-between; align-items: center; font-weight: 700; font-size: 13pt; padding: 1.5mm 0; margin: 1.5mm 0; border-top: 1pt solid #000; border-bottom: 1pt solid #000; }
+            .pay { font-size: 10pt; margin-top: 1mm; }
+            .urdu-block { margin-top: 2mm; direction: rtl; }
+            .urdu { font-size: 12pt; text-align: center; line-height: 2; }
           </style>
         </head>
         <body>${html}</body>
@@ -95,7 +101,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[100] p-4">
       <div className="bg-white rounded-lg shadow-lg w-[340px] max-h-[90vh] flex flex-col">
-        <div className="overflow-y-auto flex-1 px-5 py-4 text-gray-900 font-mono" ref={invoiceRef}>
+        <div className="overflow-y-auto flex-1 px-5 py-4 text-gray-900 [font-variant-numeric:tabular-nums]" ref={invoiceRef}>
           {/* Header */}
           <div className="text-center">
             <h2 className="text-xl font-bold tracking-widest">ZAIR ZABAR</h2>
