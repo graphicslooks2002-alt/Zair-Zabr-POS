@@ -36,7 +36,11 @@ const ManageStaff = () => {
 
   const addMutation = useMutation({
     mutationFn: (data) => register(data),
-    onSuccess: () => { refresh(); enqueueSnackbar("Staff added!", { variant: "success" }); closeModal(); },
+    onSuccess: (res) => {
+      refresh();
+      enqueueSnackbar(res?.data?.message || "Staff added!", { variant: "success", autoHideDuration: 6000 });
+      closeModal();
+    },
     onError: (err) => onErr(err, "Failed to add staff!"),
   });
   const updateMutation = useMutation({
@@ -102,12 +106,13 @@ const ManageStaff = () => {
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Phone</th>
               <th className="px-4 py-3">Role</th>
+              <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="text-[#f5f5f5]">
             {rows.length === 0 ? (
-              <tr><td colSpan={5} className="px-4 py-6 text-center text-gray-500">No staff yet.</td></tr>
+              <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">No staff yet.</td></tr>
             ) : (
               rows.map((u) => (
                 <tr key={u._id} className="border-b border-[#262626]">
@@ -118,6 +123,11 @@ const ManageStaff = () => {
                     <span className={`px-2 py-1 rounded-lg text-xs ${
                       u.role === "Admin" ? "bg-[#3a2e4a] text-[#c79bff]" : u.role === "Cashier" ? "bg-[#2e3a4a] text-[#9bc7ff]" : "bg-[#2e4a40] text-green-400"
                     }`}>{u.role}</span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className={`px-2 py-1 rounded-lg text-xs ${
+                      u.status === "Active" ? "bg-[#2e4a40] text-green-400" : u.status === "Pending Approval" ? "bg-[#4a452e] text-[#f6b100]" : "bg-[#3a3a3a] text-[#ababab]"
+                    }`}>{u.status || "Active"}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex gap-3 justify-end">
