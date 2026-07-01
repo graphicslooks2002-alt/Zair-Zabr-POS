@@ -1,17 +1,27 @@
 import React, { useEffect, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { FaPlus, FaTimes, FaEdit, FaTrash, FaPaperPlane } from "react-icons/fa";
+import { FaPlus, FaTimes, FaEdit, FaTrash, FaPaperPlane, FaEye, FaEyeSlash, FaCheck } from "react-icons/fa";
 import { getUsers, register, updateUser, deleteUser, resendVerification } from "../../https/index";
 
 const ROLES = ["Admin", "Cashier", "Waiter"];
 const empty = { name: "", email: "", phone: "", password: "", role: "Waiter" };
+
+const isStrong = (p) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(p);
+const pwdChecks = (p) => [
+  { ok: p.length >= 8, label: "8+ characters" },
+  { ok: /[A-Z]/.test(p), label: "Uppercase" },
+  { ok: /[a-z]/.test(p), label: "Lowercase" },
+  { ok: /\d/.test(p), label: "Number" },
+  { ok: /[^A-Za-z0-9]/.test(p), label: "Special char" },
+];
 
 const ManageStaff = () => {
   const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null); // null = add mode
   const [form, setForm] = useState(empty);
+  const [showPwd, setShowPwd] = useState(false);
 
   const { data: resData, isError, error } = useQuery({
     queryKey: ["users"],
@@ -61,7 +71,7 @@ const ManageStaff = () => {
 
   const openAdd = () => { setEditingId(null); setForm(empty); setShowModal(true); };
   const openEdit = (u) => { setEditingId(u._id); setForm({ name: u.name, email: u.email, phone: u.phone, password: "", role: u.role }); setShowModal(true); };
-  const closeModal = () => { setShowModal(false); setEditingId(null); setForm(empty); };
+  const closeModal = () => { setShowModal(false); setEditingId(null); setForm(empty); setShowPwd(false); };
 
   const submit = (e) => {
     e.preventDefault();
@@ -71,18 +81,19 @@ const ManageStaff = () => {
     if (!form.name.trim()) return enqueueSnackbar("Name is required.", { variant: "warning" });
     if (!phoneOk) return enqueueSnackbar("Phone must be 11 digits, e.g. 03001234567.", { variant: "warning" });
 
+    const RULE = "Password must be 8+ chars with uppercase, lowercase, number, and special character.";
     if (editingId) {
       // email is not editable; password optional (blank = keep current)
       const data = { name: form.name.trim(), phone: form.phone, role: form.role };
       if (form.password) {
-        if (form.password.length < 6) return enqueueSnackbar("Password must be at least 6 characters.", { variant: "warning" });
+        if (!isStrong(form.password)) return enqueueSnackbar(RULE, { variant: "warning" });
         data.password = form.password;
       }
       updateMutation.mutate({ id: editingId, data });
     } else {
       const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim());
       if (!emailOk) return enqueueSnackbar("Please enter a valid email address.", { variant: "warning" });
-      if (form.password.length < 6) return enqueueSnackbar("Password must be at least 6 characters.", { variant: "warning" });
+      if (!isStrong(form.password)) return enqueueSnackbar(RULE, { variant: "warning" });
       addMutation.mutate({ ...form, email: form.email.trim().toLowerCase() });
     }
   };
@@ -166,10 +177,28 @@ const ManageStaff = () => {
               <input value={form.phone} onChange={set("phone")} placeholder="Phone (e.g. 03001234567)" required
                 inputMode="numeric" maxLength={11} pattern="0[0-9]{10}" title="11 digits starting with 0"
                 className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
-              <input type="password" value={form.password} onChange={set("password")}
-                placeholder={editingId ? "New password (leave blank to keep)" : "Password (min 6 chars)"}
-                required={!editingId} minLength={6}
-                className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
+              <div>
+                <label className="block text-[#ababab] text-xs mb-1">{editingId ? "Reset Password (optional)" : "Set Password"}</label>
+                <div className="relative">
+                  <input type={showPwd ? "text" : "password"} value={form.password} onChange={set("password")}
+                    placeholder={editingId ? "New password (leave blank to keep)" : "Set a strong password"}
+                    required={!editingId}
+                    className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 pr-10 text-sm outline-none" />
+                  <button type="button" onClick={() => setShowPwd((s) => !s)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#ababab]">
+                    {showPwd ? <FaEyeSlash /> : <FaEye />}
+                  </button>
+                </div>
+                {(!editingId || form.password) && (
+                  <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
+                    {pwdChecks(form.password).map((c) => (
+                      <span key={c.label} className={`text-[11px] flex items-center gap-1 ${c.ok ? "text-green-400" : "text-[#777]"}`}>
+                        <FaCheck size={9} /> {c.label}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div>
                 <label className="block text-[#ababab] text-xs mb-1">Role</label>
                 <div className="flex gap-2">

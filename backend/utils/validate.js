@@ -26,10 +26,25 @@ const normalizePhone = (s) => String(s || "").replace(/[\s-]/g, "");
 // Pakistani mobile format: 11 digits starting with 0 (e.g. 03001234567).
 const isPhone = (s) => /^0\d{10}$/.test(normalizePhone(s));
 
+// Strong password: 8+ chars with lower, upper, number, and special char.
+const isStrongPassword = (p) => {
+  const s = String(p || "");
+  return (
+    s.length >= 8 &&
+    /[a-z]/.test(s) &&
+    /[A-Z]/.test(s) &&
+    /\d/.test(s) &&
+    /[^A-Za-z0-9]/.test(s)
+  );
+};
+
+const PASSWORD_RULE =
+  "Password must be at least 8 characters and include an uppercase letter, a lowercase letter, a number, and a special character.";
+
 const isPositiveInt = (n) =>
   Number.isInteger(Number(n)) && Number(n) > 0;
 
 const isNonNegativeNumber = (n) =>
   typeof Number(n) === "number" && !Number.isNaN(Number(n)) && Number(n) >= 0;
 
-module.exports = { isEmail, emailDomainExists, isPhone, isPositiveInt, isNonNegativeNumber, normalizePhone };
+module.exports = { isEmail, emailDomainExists, isPhone, isStrongPassword, PASSWORD_RULE, isPositiveInt, isNonNegativeNumber, normalizePhone };

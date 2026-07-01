@@ -4,7 +4,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 const { ROLES } = require("../middlewares/authorize");
-const { isEmail, emailDomainExists, isPhone } = require("../utils/validate");
+const { isEmail, emailDomainExists, isPhone, isStrongPassword, PASSWORD_RULE } = require("../utils/validate");
 const { sendVerifyEmail, sendApprovalEmail } = require("../utils/mailer");
 
 const UUID_RE =
@@ -67,8 +67,8 @@ const register = async (req, res, next) => {
     if (!isPhone(phone)) {
       return next(createHttpError(400, "Phone must be 11 digits, e.g. 03001234567."));
     }
-    if (password.length < 6) {
-      return next(createHttpError(400, "Password must be at least 6 characters."));
+    if (!isStrongPassword(password)) {
+      return next(createHttpError(400, PASSWORD_RULE));
     }
 
     // First user (bootstrap) is always Admin; otherwise role must be valid.
@@ -339,7 +339,7 @@ const updateUser = async (req, res, next) => {
       patch.role = role;
     }
     if (password) {
-      if (password.length < 6) return next(createHttpError(400, "Password must be at least 6 characters."));
+      if (!isStrongPassword(password)) return next(createHttpError(400, PASSWORD_RULE));
       patch.password = await bcrypt.hash(password, await bcrypt.genSalt(10));
     }
 

@@ -28,7 +28,8 @@ const Register = ({setIsRegister}) => {
     const phoneOk = /^0\d{10}$/.test(String(formData.phone).replace(/[\s-]/g, ""));
     if (!emailOk) return enqueueSnackbar("Please enter a valid email address.", { variant: "warning" });
     if (!phoneOk) return enqueueSnackbar("Phone must be 11 digits, e.g. 03001234567.", { variant: "warning" });
-    if (formData.password.length < 6) return enqueueSnackbar("Password must be at least 6 characters.", { variant: "warning" });
+    if (!/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(formData.password))
+      return enqueueSnackbar("Password must be 8+ chars with uppercase, lowercase, number, and special character.", { variant: "warning" });
     if (!formData.role) return enqueueSnackbar("Please choose a role.", { variant: "warning" });
 
     registerMutation.mutate({ ...formData, email: formData.email.trim().toLowerCase() });
