@@ -202,6 +202,31 @@ const approveUser = async (req, res, next) => {
   }
 };
 
+// POST /api/user/:id/resend-verify  (Admin) — resend the verification email.
+const resendVerification = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!UUID_RE.test(id)) return next(createHttpError(404, "Invalid staff id."));
+
+    const { data: user } = await supabase.from("users").select("*").eq("id", id).maybeSingle();
+    if (!user) return next(createHttpError(404, "Staff member not found."));
+    if (user.email_verified) {
+      return next(createHttpError(400, "This account's email is already verified."));
+    }
+
+    try {
+      const verifyUrl = `${config.serverUrl}/api/user/verify?token=${linkToken(user.id, "verify", "2d")}`;
+      await sendVerifyEmail(user, verifyUrl);
+    } catch (e) {
+      return next(createHttpError(500, `Could not send email: ${e.message}`));
+    }
+
+    res.status(200).json({ success: true, message: `Verification email resent to ${user.email}.` });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const login = async (req, res, next) => {
   try {
     let { email } = req.body;
@@ -351,4 +376,4 @@ const logout = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, verifyEmail, approveUser, getUserData, getAllUsers, updateUser, deleteUser, logout };
+module.exports = { register, login, verifyEmail, approveUser, resendVerification, getUserData, getAllUsers, updateUser, deleteUser, logout };

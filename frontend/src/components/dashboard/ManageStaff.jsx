@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { FaPlus, FaTimes, FaEdit, FaTrash } from "react-icons/fa";
-import { getUsers, register, updateUser, deleteUser } from "../../https/index";
+import { FaPlus, FaTimes, FaEdit, FaTrash, FaPaperPlane } from "react-icons/fa";
+import { getUsers, register, updateUser, deleteUser, resendVerification } from "../../https/index";
 
 const ROLES = ["Admin", "Cashier", "Waiter"];
 const empty = { name: "", email: "", phone: "", password: "", role: "Waiter" };
@@ -52,6 +52,11 @@ const ManageStaff = () => {
     mutationFn: (id) => deleteUser(id),
     onSuccess: () => { refresh(); enqueueSnackbar("Staff deleted.", { variant: "success" }); },
     onError: (err) => onErr(err, "Failed to delete staff!"),
+  });
+  const resendMutation = useMutation({
+    mutationFn: (id) => resendVerification(id),
+    onSuccess: (res) => enqueueSnackbar(res?.data?.message || "Verification email resent.", { variant: "success", autoHideDuration: 6000 }),
+    onError: (err) => onErr(err, "Failed to resend verification."),
   });
 
   const openAdd = () => { setEditingId(null); setForm(empty); setShowModal(true); };
@@ -131,6 +136,9 @@ const ManageStaff = () => {
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex gap-3 justify-end">
+                      {u.status !== "Active" && (
+                        <button onClick={() => resendMutation.mutate(u._id)} disabled={resendMutation.isPending} className="text-[#f6b100]" title="Resend verification email"><FaPaperPlane /></button>
+                      )}
                       <button onClick={() => openEdit(u)} className="text-[#025cca]" title="Edit"><FaEdit /></button>
                       <button onClick={() => { if (window.confirm(`Delete ${u.name}?`)) deleteMutation.mutate(u._id); }} className="text-red-500" title="Delete"><FaTrash /></button>
                     </div>

@@ -9,6 +9,7 @@ export const getUserData = () => axiosWrapper.get("/api/user");
 export const getUsers = () => axiosWrapper.get("/api/user/all");
 export const updateUser = (id, data) => axiosWrapper.put(`/api/user/${id}`, data);
 export const deleteUser = (id) => axiosWrapper.delete(`/api/user/${id}`);
+export const resendVerification = (id) => axiosWrapper.post(`/api/user/${id}/resend-verify`);
 export const logout = () => axiosWrapper.post("/api/user/logout");
 
 // Table Endpoints

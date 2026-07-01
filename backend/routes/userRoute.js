@@ -1,5 +1,5 @@
 const express = require("express");
-const { register, login, verifyEmail, approveUser, getUserData, getAllUsers, updateUser, deleteUser, logout } = require("../controllers/userController");
+const { register, login, verifyEmail, approveUser, resendVerification, getUserData, getAllUsers, updateUser, deleteUser, logout } = require("../controllers/userController");
 const { isVerifiedUser } = require("../middlewares/tokenVerification");
 const { adminOrBootstrap, authorize } = require("../middlewares/authorize");
 const { authLimiter } = require("../middlewares/rateLimit");
@@ -17,6 +17,7 @@ router.route("/verify").get(verifyEmail);
 router.route("/approve").get(approveUser);
 
 router.route("/all").get(isVerifiedUser, authorize("Admin"), getAllUsers);
+router.route("/:id/resend-verify").post(isVerifiedUser, authorize("Admin"), resendVerification);
 router.route("/:id").put(isVerifiedUser, authorize("Admin"), updateUser);
 router.route("/:id").delete(isVerifiedUser, authorize("Admin"), deleteUser);
 router.route("/").get(isVerifiedUser , getUserData);
