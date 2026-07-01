@@ -40,14 +40,14 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
       <div class="row"><span>Customer: ${c.name || "—"}</span><span>${orderInfo.orderType || ""}</span></div>
       <table class="items">
         <thead>
-          <tr><th class="qty">QTY</th><th class="name">PRODUCT NAME</th><th class="num">RATE</th><th class="num">AMOUNT</th></tr>
+          <tr><th class="qty">Qty</th><th class="name">Product Name</th><th class="num">Rate</th><th class="num">Amount</th></tr>
         </thead>
         <tbody>${itemRows}</tbody>
       </table>
       <div class="divider"></div>
       <div class="row"><span>Total Items: ${items.length}</span><span>Gross: ${Number(bills.total || 0).toFixed(0)}</span></div>
       ${bills.discount > 0 ? `<div class="row"><span></span><span>Discount: ${Number(bills.discount).toFixed(0)}</span></div>` : ""}
-      <div class="totalbar"><span>TOTAL BILL</span><span>Rs ${Number(bills.totalWithTax || 0).toFixed(0)}</span></div>
+      <div class="totalbar"><span>Total Bill</span><span>Rs ${Number(bills.totalWithTax || 0).toFixed(0)}</span></div>
       <div class="row pay"><span>Payment: ${orderInfo.paymentMethod || "—"}${orderInfo.paymentStatus ? " · " + orderInfo.paymentStatus : ""}</span></div>
       ${orderInfo.notes ? `<div class="row"><span>Notes: ${orderInfo.notes}</span></div>` : ""}
       <div class="divider"></div>
@@ -74,7 +74,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             .divider { border-top: 1px dashed #000; margin: 2mm 0; }
             .row { display: flex; justify-content: space-between; gap: 3mm; font-size: 10pt; margin: 1mm 0; }
             table.items { width: 100%; border-collapse: collapse; margin: 1.5mm 0; font-size: 10pt; }
-            table.items th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1mm 0.5mm; text-align: left; font-weight: 700; }
+            table.items th { border-top: 1px solid #000; border-bottom: 1px solid #000; padding: 1mm 0.5mm; text-align: left; font-weight: 400; }
             table.items td { padding: 0.9mm 0.5mm; vertical-align: top; }
             .qty { width: 7mm; }
             .num { text-align: right; white-space: nowrap; }
@@ -125,10 +125,10 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
           <table className="w-full text-xs mt-2" style={{ borderCollapse: "collapse" }}>
             <thead>
               <tr className="border-y border-dashed border-gray-500">
-                <th className="text-left py-1 w-7">QTY</th>
-                <th className="text-left py-1">PRODUCT NAME</th>
-                <th className="text-right py-1">RATE</th>
-                <th className="text-right py-1">AMOUNT</th>
+                <th className="text-left py-1 w-7 font-normal text-[#555]">Qty</th>
+                <th className="text-left py-1 font-normal text-[#555]">Product Name</th>
+                <th className="text-right py-1 font-normal text-[#555]">Rate</th>
+                <th className="text-right py-1 font-normal text-[#555]">Amount</th>
               </tr>
             </thead>
             <tbody>
@@ -157,7 +157,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
 
           {/* Total bill — bold double rule (thermal-friendly) */}
           <div className="flex justify-between items-center font-bold text-lg py-2 my-2 border-y-[3px] border-double border-black">
-            <span>TOTAL BILL</span>
+            <span>Total Bill</span>
             <span>Rs {Number(bills.totalWithTax || 0).toFixed(0)}</span>
           </div>
 

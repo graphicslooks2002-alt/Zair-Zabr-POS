@@ -4,7 +4,10 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 const { ROLES } = require("../middlewares/authorize");
-const { isEmail, isPhone } = require("../utils/validate");
+const { isEmail, emailDomainExists, isPhone } = require("../utils/validate");
+
+const UUID_RE =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const publicUser = (u) => ({
   _id: u.id,
@@ -35,6 +38,9 @@ const register = async (req, res, next) => {
 
     if (!isEmail(email)) {
       return next(createHttpError(400, "Please enter a valid email address."));
+    }
+    if (!(await emailDomainExists(email))) {
+      return next(createHttpError(400, "This email address doesn't seem to exist. Please check for typos."));
     }
     if (!isPhone(phone)) {
       return next(createHttpError(400, "Phone must be 11 digits, e.g. 03001234567."));
@@ -163,6 +169,54 @@ const getUserData = async (req, res, next) => {
   }
 };
 
+const updateUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!UUID_RE.test(id)) return next(createHttpError(404, "Invalid staff id."));
+
+    const { name, phone, role, password } = req.body;
+    const patch = {};
+    if (name !== undefined) {
+      if (!name.trim()) return next(createHttpError(400, "Name cannot be empty."));
+      patch.name = name.trim();
+    }
+    if (phone !== undefined) {
+      if (!isPhone(phone)) return next(createHttpError(400, "Phone must be 11 digits, e.g. 03001234567."));
+      patch.phone = String(phone);
+    }
+    if (role !== undefined) {
+      if (!ROLES.includes(role)) return next(createHttpError(400, "Invalid role."));
+      patch.role = role;
+    }
+    if (password) {
+      if (password.length < 6) return next(createHttpError(400, "Password must be at least 6 characters."));
+      patch.password = await bcrypt.hash(password, await bcrypt.genSalt(10));
+    }
+
+    const { data, error } = await supabase.from("users").update(patch).eq("id", id).select("*").single();
+    if (error || !data) return next(createHttpError(404, "Staff member not found."));
+
+    res.status(200).json({ success: true, message: "Staff updated!", data: publicUser(data) });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!UUID_RE.test(id)) return next(createHttpError(404, "Invalid staff id."));
+    if (id === req.user._id) {
+      return next(createHttpError(400, "You cannot delete your own account."));
+    }
+    const { error } = await supabase.from("users").delete().eq("id", id);
+    if (error) return next(createHttpError(500, error.message));
+    res.status(200).json({ success: true, message: "Staff deleted." });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const logout = async (req, res, next) => {
   try {
     res.clearCookie("accessToken", cookieBase);
@@ -172,4 +226,4 @@ const logout = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, getUserData, getAllUsers, logout };
+module.exports = { register, login, getUserData, getAllUsers, updateUser, deleteUser, logout };

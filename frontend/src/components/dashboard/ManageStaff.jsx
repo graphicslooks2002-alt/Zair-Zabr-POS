@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { FaPlus, FaTimes } from "react-icons/fa";
-import { getUsers, register } from "../../https/index";
+import { FaPlus, FaTimes, FaEdit, FaTrash } from "react-icons/fa";
+import { getUsers, register, updateUser, deleteUser } from "../../https/index";
 
 const ROLES = ["Admin", "Cashier", "Waiter"];
 const empty = { name: "", email: "", phone: "", password: "", role: "Waiter" };
@@ -10,6 +10,7 @@ const empty = { name: "", email: "", phone: "", password: "", role: "Waiter" };
 const ManageStaff = () => {
   const queryClient = useQueryClient();
   const [showModal, setShowModal] = useState(false);
+  const [editingId, setEditingId] = useState(null); // null = add mode
   const [form, setForm] = useState(empty);
 
   const { data: resData, isError, error } = useQuery({
@@ -19,7 +20,6 @@ const ManageStaff = () => {
     retry: false,
   });
 
-  // Show the load error once (not on every render).
   useEffect(() => {
     if (isError) {
       const msg =
@@ -30,46 +30,66 @@ const ManageStaff = () => {
     }
   }, [isError, error]);
 
+  const refresh = () => queryClient.invalidateQueries({ queryKey: ["users"] });
+  const onErr = (err, fallback) =>
+    enqueueSnackbar(err?.response?.data?.message || fallback, { variant: "error" });
+
   const addMutation = useMutation({
     mutationFn: (data) => register(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["users"] });
-      enqueueSnackbar("Staff added!", { variant: "success" });
-      setForm(empty);
-      setShowModal(false);
-    },
-    onError: (err) =>
-      enqueueSnackbar(err?.response?.data?.message || "Failed to add staff!", { variant: "error" }),
+    onSuccess: () => { refresh(); enqueueSnackbar("Staff added!", { variant: "success" }); closeModal(); },
+    onError: (err) => onErr(err, "Failed to add staff!"),
   });
+  const updateMutation = useMutation({
+    mutationFn: ({ id, data }) => updateUser(id, data),
+    onSuccess: () => { refresh(); enqueueSnackbar("Staff updated!", { variant: "success" }); closeModal(); },
+    onError: (err) => onErr(err, "Failed to update staff!"),
+  });
+  const deleteMutation = useMutation({
+    mutationFn: (id) => deleteUser(id),
+    onSuccess: () => { refresh(); enqueueSnackbar("Staff deleted.", { variant: "success" }); },
+    onError: (err) => onErr(err, "Failed to delete staff!"),
+  });
+
+  const openAdd = () => { setEditingId(null); setForm(empty); setShowModal(true); };
+  const openEdit = (u) => { setEditingId(u._id); setForm({ name: u.name, email: u.email, phone: u.phone, password: "", role: u.role }); setShowModal(true); };
+  const closeModal = () => { setShowModal(false); setEditingId(null); setForm(empty); };
 
   const submit = (e) => {
     e.preventDefault();
-    if (addMutation.isPending) return;
+    if (addMutation.isPending || updateMutation.isPending) return;
 
-    const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim());
     const phoneOk = /^0\d{10}$/.test(form.phone.replace(/[\s-]/g, ""));
     if (!form.name.trim()) return enqueueSnackbar("Name is required.", { variant: "warning" });
-    if (!emailOk) return enqueueSnackbar("Please enter a valid email address.", { variant: "warning" });
     if (!phoneOk) return enqueueSnackbar("Phone must be 11 digits, e.g. 03001234567.", { variant: "warning" });
-    if (form.password.length < 6) return enqueueSnackbar("Password must be at least 6 characters.", { variant: "warning" });
 
-    addMutation.mutate({ ...form, email: form.email.trim().toLowerCase() });
+    if (editingId) {
+      // email is not editable; password optional (blank = keep current)
+      const data = { name: form.name.trim(), phone: form.phone, role: form.role };
+      if (form.password) {
+        if (form.password.length < 6) return enqueueSnackbar("Password must be at least 6 characters.", { variant: "warning" });
+        data.password = form.password;
+      }
+      updateMutation.mutate({ id: editingId, data });
+    } else {
+      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(form.email.trim());
+      if (!emailOk) return enqueueSnackbar("Please enter a valid email address.", { variant: "warning" });
+      if (form.password.length < 6) return enqueueSnackbar("Password must be at least 6 characters.", { variant: "warning" });
+      addMutation.mutate({ ...form, email: form.email.trim().toLowerCase() });
+    }
   };
 
   const rows = resData?.data?.data || [];
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+  const saving = addMutation.isPending || updateMutation.isPending;
 
   return (
     <div className="container mx-auto py-2 px-6">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="font-semibold text-[#f5f5f5] text-xl">Manage Staff</h2>
-          <p className="text-sm text-[#ababab]">Add and view employee accounts.</p>
+          <p className="text-sm text-[#ababab]">Add, edit, or remove employee accounts.</p>
         </div>
-        <button
-          onClick={() => setShowModal(true)}
-          className="flex items-center gap-2 bg-[#e85d04] text-white font-semibold rounded-lg px-5 py-2.5"
-        >
+        <button onClick={openAdd} className="flex items-center gap-2 bg-[#e85d04] text-white font-semibold rounded-lg px-5 py-2.5">
           <FaPlus /> Add Staff
         </button>
       </div>
@@ -82,11 +102,12 @@ const ManageStaff = () => {
               <th className="px-4 py-3">Email</th>
               <th className="px-4 py-3">Phone</th>
               <th className="px-4 py-3">Role</th>
+              <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
           <tbody className="text-[#f5f5f5]">
             {rows.length === 0 ? (
-              <tr><td colSpan={4} className="px-4 py-6 text-center text-gray-500">No staff yet.</td></tr>
+              <tr><td colSpan={5} className="px-4 py-6 text-center text-gray-500">No staff yet.</td></tr>
             ) : (
               rows.map((u) => (
                 <tr key={u._id} className="border-b border-[#262626]">
@@ -97,6 +118,12 @@ const ManageStaff = () => {
                     <span className={`px-2 py-1 rounded-lg text-xs ${
                       u.role === "Admin" ? "bg-[#3a2e4a] text-[#c79bff]" : u.role === "Cashier" ? "bg-[#2e3a4a] text-[#9bc7ff]" : "bg-[#2e4a40] text-green-400"
                     }`}>{u.role}</span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex gap-3 justify-end">
+                      <button onClick={() => openEdit(u)} className="text-[#025cca]" title="Edit"><FaEdit /></button>
+                      <button onClick={() => { if (window.confirm(`Delete ${u.name}?`)) deleteMutation.mutate(u._id); }} className="text-red-500" title="Delete"><FaTrash /></button>
+                    </div>
                   </td>
                 </tr>
               ))
@@ -109,18 +136,21 @@ const ManageStaff = () => {
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4">
           <div className="bg-[#262626] rounded-lg w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#f5f5f5] text-lg font-semibold">Add Staff</h3>
-              <button onClick={() => setShowModal(false)} className="text-gray-400 hover:text-white"><FaTimes /></button>
+              <h3 className="text-[#f5f5f5] text-lg font-semibold">{editingId ? "Edit Staff" : "Add Staff"}</h3>
+              <button onClick={closeModal} className="text-gray-400 hover:text-white"><FaTimes /></button>
             </div>
             <form onSubmit={submit} className="space-y-3">
               <input value={form.name} onChange={set("name")} placeholder="Full name" required
                 className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
-              <input type="email" value={form.email} onChange={set("email")} placeholder="Email" required
-                className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
+              <input type="email" value={form.email} onChange={set("email")} placeholder="Email"
+                required={!editingId} disabled={!!editingId}
+                className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none disabled:opacity-50" />
               <input value={form.phone} onChange={set("phone")} placeholder="Phone (e.g. 03001234567)" required
                 inputMode="numeric" maxLength={11} pattern="0[0-9]{10}" title="11 digits starting with 0"
                 className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
-              <input type="password" value={form.password} onChange={set("password")} placeholder="Password (min 6 chars)" required minLength={6}
+              <input type="password" value={form.password} onChange={set("password")}
+                placeholder={editingId ? "New password (leave blank to keep)" : "Password (min 6 chars)"}
+                required={!editingId} minLength={6}
                 className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
               <div>
                 <label className="block text-[#ababab] text-xs mb-1">Role</label>
@@ -133,9 +163,9 @@ const ManageStaff = () => {
                   ))}
                 </div>
               </div>
-              <button type="submit" disabled={addMutation.isPending}
+              <button type="submit" disabled={saving}
                 className="w-full bg-[#e85d04] text-white py-3 rounded-lg font-semibold disabled:opacity-50">
-                {addMutation.isPending ? "Adding..." : "Add Staff"}
+                {saving ? "Saving..." : editingId ? "Save Changes" : "Add Staff"}
               </button>
             </form>
           </div>

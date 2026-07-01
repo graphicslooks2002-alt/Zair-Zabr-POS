@@ -7,6 +7,8 @@ export const login = (data) => axiosWrapper.post("/api/user/login", data);
 export const register = (data) => axiosWrapper.post("/api/user/register", data);
 export const getUserData = () => axiosWrapper.get("/api/user");
 export const getUsers = () => axiosWrapper.get("/api/user/all");
+export const updateUser = (id, data) => axiosWrapper.put(`/api/user/${id}`, data);
+export const deleteUser = (id) => axiosWrapper.delete(`/api/user/${id}`);
 export const logout = () => axiosWrapper.post("/api/user/logout");
 
 // Table Endpoints
