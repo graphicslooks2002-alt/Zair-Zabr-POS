@@ -15,6 +15,7 @@ const Header = () => {
   const userData = useSelector((state) => state.user);
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
   const logoutMutation = useMutation({
     mutationFn: () => logout(),
@@ -73,12 +74,36 @@ const Header = () => {
             </p>
           </div>
           <IoLogOut
-            onClick={handleLogout}
-            className="text-[#f5f5f5] ml-2"
+            onClick={() => setShowLogoutConfirm(true)}
+            className="text-[#f5f5f5] ml-2 cursor-pointer"
             size={40}
           />
         </div>
       </div>
+
+      {showLogoutConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4">
+          <div className="bg-[#262626] rounded-lg w-full max-w-sm p-6 text-center">
+            <h3 className="text-[#f5f5f5] text-lg font-semibold mb-2">Log out?</h3>
+            <p className="text-[#ababab] text-sm mb-6">Are you sure you want to log out of Zair Zabar POS?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                className="flex-1 bg-[#1f1f1f] text-[#f5f5f5] py-2.5 rounded-lg font-semibold"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => { setShowLogoutConfirm(false); handleLogout(); }}
+                disabled={logoutMutation.isPending}
+                className="flex-1 bg-[#d00000] text-white py-2.5 rounded-lg font-semibold disabled:opacity-50"
+              >
+                {logoutMutation.isPending ? "Logging out..." : "Yes, log out"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };
