@@ -6,3 +6,4 @@ export { default as Menu } from './Menu.jsx'
 export { default as Dashboard } from "./Dashboard.jsx"
 export { default as CreateOrder } from "./CreateOrder.jsx"
 export { default as MetricDetail } from "./MetricDetail.jsx"
+export { default as ResetPassword } from "./ResetPassword.jsx"

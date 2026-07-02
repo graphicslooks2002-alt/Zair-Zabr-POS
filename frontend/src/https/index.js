@@ -5,6 +5,8 @@ import { axiosWrapper } from "./axiosWrapper";
 // Auth Endpoints
 export const login = (data) => axiosWrapper.post("/api/user/login", data);
 export const register = (data) => axiosWrapper.post("/api/user/register", data);
+export const forgotPassword = (email) => axiosWrapper.post("/api/user/forgot-password", { email });
+export const resetPassword = (token, password) => axiosWrapper.post("/api/user/reset-password", { token, password });
 export const getUserData = () => axiosWrapper.get("/api/user");
 export const getUsers = () => axiosWrapper.get("/api/user/all");
 export const updateUser = (id, data) => axiosWrapper.put(`/api/user/${id}`, data);

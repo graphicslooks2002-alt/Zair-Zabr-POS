@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const config = require("../config/config");
 const { ROLES } = require("../middlewares/authorize");
 const { isEmail, emailDomainExists, isPhone, isStrongPassword, PASSWORD_RULE } = require("../utils/validate");
-const { sendVerifyEmail, sendApprovalEmail } = require("../utils/mailer");
+const { sendVerifyEmail, sendApprovalEmail, sendResetEmail } = require("../utils/mailer");
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -227,6 +227,65 @@ const resendVerification = async (req, res, next) => {
   }
 };
 
+// POST /api/user/forgot-password { email } — emails a reset link (always responds success).
+const forgotPassword = async (req, res, next) => {
+  try {
+    let { email } = req.body;
+    if (!email) return next(createHttpError(400, "Please enter your email."));
+    email = String(email).trim().toLowerCase();
+
+    const generic = { success: true, message: "If an account exists for that email, a reset link has been sent." };
+
+    if (!isEmail(email)) return res.status(200).json(generic); // don't reveal validity
+
+    const { data: user } = await supabase.from("users").select("*").eq("email", email).maybeSingle();
+    if (user) {
+      try {
+        const resetUrl = `${config.frontendUrl}/reset-password?token=${linkToken(user.id, "reset", "30m")}`;
+        await sendResetEmail(user, resetUrl);
+      } catch (e) {
+        console.log("Reset email failed:", e.message);
+      }
+    }
+    // Always the same response — don't leak whether the email is registered.
+    res.status(200).json(generic);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// POST /api/user/reset-password { token, password } — sets a new password.
+const resetPassword = async (req, res, next) => {
+  try {
+    const { token, password } = req.body;
+    if (!token) return next(createHttpError(400, "Reset token is missing."));
+    if (!isStrongPassword(password)) return next(createHttpError(400, PASSWORD_RULE));
+
+    let decoded;
+    try {
+      decoded = jwt.verify(token, config.accessTokenSecret);
+    } catch (_) {
+      return next(createHttpError(400, "This reset link is invalid or has expired. Please request a new one."));
+    }
+    if (decoded.purpose !== "reset") {
+      return next(createHttpError(400, "Invalid reset link."));
+    }
+
+    const hash = await bcrypt.hash(password, await bcrypt.genSalt(10));
+    const { data, error } = await supabase
+      .from("users")
+      .update({ password: hash })
+      .eq("id", decoded._id)
+      .select("id")
+      .single();
+    if (error || !data) return next(createHttpError(404, "Account not found."));
+
+    res.status(200).json({ success: true, message: "Password updated. You can now log in with your new password." });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const login = async (req, res, next) => {
   try {
     let { email } = req.body;
@@ -376,4 +435,4 @@ const logout = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, verifyEmail, approveUser, resendVerification, getUserData, getAllUsers, updateUser, deleteUser, logout };
+module.exports = { register, login, verifyEmail, approveUser, resendVerification, forgotPassword, resetPassword, getUserData, getAllUsers, updateUser, deleteUser, logout };

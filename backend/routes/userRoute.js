@@ -1,5 +1,5 @@
 const express = require("express");
-const { register, login, verifyEmail, approveUser, resendVerification, getUserData, getAllUsers, updateUser, deleteUser, logout } = require("../controllers/userController");
+const { register, login, verifyEmail, approveUser, resendVerification, forgotPassword, resetPassword, getUserData, getAllUsers, updateUser, deleteUser, logout } = require("../controllers/userController");
 const { isVerifiedUser } = require("../middlewares/tokenVerification");
 const { adminOrBootstrap, authorize } = require("../middlewares/authorize");
 const { authLimiter } = require("../middlewares/rateLimit");
@@ -10,6 +10,8 @@ const router = express.Router();
 // register: open only for the very first user (bootstrap), else Admin-only.
 router.route("/register").post(authLimiter, adminOrBootstrap, register);
 router.route("/login").post(authLimiter, login);
+router.route("/forgot-password").post(authLimiter, forgotPassword);
+router.route("/reset-password").post(authLimiter, resetPassword);
 router.route("/logout").post(isVerifiedUser, logout)
 
 // Email links (token-secured, clicked from inbox — no login).

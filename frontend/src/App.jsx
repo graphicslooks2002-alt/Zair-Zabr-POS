@@ -5,7 +5,7 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { Home, Auth, Orders, Tables, Menu, Dashboard, CreateOrder, MetricDetail } from "./pages";
+import { Home, Auth, Orders, Tables, Menu, Dashboard, CreateOrder, MetricDetail, ResetPassword } from "./pages";
 import Header from "./components/shared/Header";
 import { useSelector } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
@@ -14,7 +14,7 @@ import FullScreenLoader from "./components/shared/FullScreenLoader"
 function Layout() {
   const isLoading = useLoadData();
   const location = useLocation();
-  const hideHeaderRoutes = ["/auth"];
+  const hideHeaderRoutes = ["/auth", "/reset-password"];
   const { isAuth } = useSelector(state => state.user);
 
   if(isLoading) return <FullScreenLoader />
@@ -32,6 +32,7 @@ function Layout() {
           }
         />
         <Route path="/auth" element={isAuth ? <Navigate to="/" /> : <Auth />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route
           path="/orders"
           element={

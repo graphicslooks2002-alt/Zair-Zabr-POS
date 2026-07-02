@@ -68,4 +68,21 @@ const sendApprovalEmail = async (user, approveUrl) => {
   });
 };
 
-module.exports = { sendVerifyEmail, sendApprovalEmail, getTransporter };
+// Sent to a user who requested a password reset.
+const sendResetEmail = async (user, resetUrl) => {
+  const t = getTransporter();
+  if (!t) throw new Error("Email service not configured (EMAIL_USER/EMAIL_PASS missing).");
+  await t.sendMail({
+    from: FROM(),
+    to: user.email,
+    subject: "Reset your Zair Zabar POS password",
+    html: shell(
+      `Hi ${user.name}, reset your password`,
+      `<p>We received a request to reset your password. Click below to choose a new one:</p>
+       <p>${button(resetUrl, "Reset Password", "#025cca")}</p>
+       <p style="font-size:12px;color:#888">This link expires in 30 minutes. If you didn't request this, ignore this email — your password stays the same.</p>`
+    ),
+  });
+};
+
+module.exports = { sendVerifyEmail, sendApprovalEmail, sendResetEmail, getTransporter };

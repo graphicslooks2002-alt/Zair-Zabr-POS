@@ -3,6 +3,7 @@ import restaurant from "../assets/images/restaurant-img.jpg"
 import logo from "../assets/images/logo.png"
 import Register from "../components/auth/Register";
 import Login from "../components/auth/Login";
+import ForgotPassword from "../components/auth/ForgotPassword";
 
 const Auth = () => {
 
@@ -11,6 +12,7 @@ const Auth = () => {
   }, [])
 
   const [isRegister, setIsRegister] = useState(false);
+  const [isForgot, setIsForgot] = useState(false);
 
   return (
     <div className="flex min-h-screen w-full">
@@ -39,21 +41,35 @@ const Auth = () => {
         </div>
 
         <h2 className="text-4xl text-center mt-10 font-semibold text-[#e85d04] mb-10">
-          {isRegister ? "Employee Registration" : "Employee Login"}
+          {isForgot ? "Forgot Password" : isRegister ? "Employee Registration" : "Employee Login"}
         </h2>
 
-        {/* Components */}  
-        {isRegister ? <Register setIsRegister={setIsRegister} /> : <Login />}
+        {/* Components */}
+        {isForgot ? (
+          <ForgotPassword onBack={() => setIsForgot(false)} />
+        ) : isRegister ? (
+          <Register setIsRegister={setIsRegister} />
+        ) : (
+          <>
+            <Login />
+            <div className="text-center mt-4">
+              <button onClick={() => setIsForgot(true)} className="text-[#ababab] text-sm hover:text-[#e85d04] hover:underline">
+                Forgot password?
+              </button>
+            </div>
+          </>
+        )}
 
-
-        <div className="flex justify-center mt-6">
-          <p className="text-sm text-[#ababab]">
-            {isRegister ? "Already have an account?" : "Don't have an account?"}
-            <a onClick={() => setIsRegister(!isRegister)} className="text-[#e85d04] font-semibold hover:underline" href="#">
-              {isRegister ? "Sign in" : "Sign up"}
-            </a>
-          </p>
-        </div>
+        {!isForgot && (
+          <div className="flex justify-center mt-6">
+            <p className="text-sm text-[#ababab]">
+              {isRegister ? "Already have an account?" : "Don't have an account?"}
+              <a onClick={() => setIsRegister(!isRegister)} className="text-[#e85d04] font-semibold hover:underline ml-1" href="#">
+                {isRegister ? "Sign in" : "Sign up"}
+              </a>
+            </p>
+          </div>
+        )}
 
 
       </div>
