@@ -13,9 +13,13 @@ const TableCard = ({id, name, status, initials, seats}) => {
 
   return (
     <div onClick={handleClick} className="w-full hover:bg-[#2c2c2c] bg-[#262626] p-4 rounded-lg cursor-pointer">
-      <div className="flex items-center justify-between px-1">
-        <h1 className="text-[#f5f5f5] text-xl font-semibold">Table <FaLongArrowAltRight className="text-[#ababab] ml-2 inline" /> {name}</h1>
-        <p className={`${status === "Booked" ? "text-[#f6b100] bg-[#664a04]" : "text-green-600 bg-[#2e4a40]"} px-2 py-1 rounded-lg text-sm shrink-0 whitespace-nowrap`}>
+      <div className="flex items-center justify-between gap-2 px-1">
+        <h1 className="text-[#f5f5f5] text-base sm:text-lg font-semibold flex items-center gap-1 min-w-0">
+          <span className="truncate">Table</span>
+          <FaLongArrowAltRight className="text-[#ababab] shrink-0" />
+          <span>{name}</span>
+        </h1>
+        <p className={`${status === "Booked" ? "text-[#f6b100] bg-[#664a04]" : "text-green-600 bg-[#2e4a40]"} px-2 py-1 rounded-lg text-xs shrink-0 whitespace-nowrap`}>
           {status}
         </p>
       </div>

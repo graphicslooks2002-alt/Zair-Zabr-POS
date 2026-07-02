@@ -38,13 +38,13 @@ const Orders = () => {
 
   return (
     <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex flex-col">
-      <div className="flex items-center justify-between px-10 py-4 shrink-0">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-10 py-4 shrink-0">
         <div className="flex items-center gap-4">
           <BackButton />
           <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wider">Orders</h1>
         </div>
-        <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-lg px-4 py-2 w-[280px]">
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-lg px-4 py-2 w-full sm:w-[280px]">
             <FaSearch className="text-[#ababab]" />
             <input
               value={search}
@@ -63,7 +63,7 @@ const Orders = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-20">
-        <div className="grid grid-cols-2 gap-4 px-10 py-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 sm:px-10 py-4">
           {filtered.length > 0 ? (
             filtered.map((order) => <OrderCard key={order._id} order={order} />)
           ) : (

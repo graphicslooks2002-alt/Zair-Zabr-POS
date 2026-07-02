@@ -53,7 +53,7 @@ const Tables = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-20">
-        <div className="grid grid-cols-5 gap-3 px-16 py-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 px-4 sm:px-8 lg:px-16 py-4">
           {resData?.data.data
             .filter((table) => (status === "booked" ? table.status === "Booked" : true))
             .map((table) => (

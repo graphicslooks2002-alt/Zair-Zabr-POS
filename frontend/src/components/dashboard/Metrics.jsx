@@ -180,7 +180,7 @@ const Metrics = () => {
         {mode === "session" ? "Revenue for the current business session." : `Showing: ${MODES.find((m) => m.key === mode)?.label}`}
       </p>
 
-      <div className="mt-6 grid grid-cols-4 gap-4">
+      <div className="mt-6 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
         {cards.map((c) => (
           <button
             key={c.key}
@@ -198,7 +198,7 @@ const Metrics = () => {
       <div className="mt-12">
         <h2 className="font-semibold text-[#f5f5f5] text-xl">Item Details</h2>
         <p className="text-sm text-[#ababab]">Catalog size and live counts.</p>
-        <div className="mt-6 grid grid-cols-4 gap-4">
+        <div className="mt-6 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {items.map((c, i) => (
             <div key={i} className="shadow-sm rounded-lg p-4" style={{ backgroundColor: c.color }}>
               <p className="font-medium text-xs text-[#f5f5f5]">{c.title}</p>

@@ -30,9 +30,9 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex flex-col">
-      <div className="container mx-auto flex items-center justify-between py-6 px-6 shrink-0">
-        <div className="flex items-center gap-3">
+    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex flex-col overflow-x-hidden">
+      <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 py-6 px-6 shrink-0">
+        <div className="flex flex-wrap items-center gap-3">
           {buttons.map(({ label, icon, action }) => (
             <button
               key={label}
@@ -44,7 +44,7 @@ const Dashboard = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           {tabs.map((tab) => (
             <button
               key={tab}

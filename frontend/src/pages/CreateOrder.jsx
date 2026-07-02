@@ -187,12 +187,12 @@ const CreateOrder = () => {
     <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex overflow-hidden">
       {/* LEFT: menu + search */}
       <div className="flex-1 min-w-0 flex flex-col min-h-0">
-        <div className="flex items-center gap-4 px-6 py-4 shrink-0">
+        <div className="flex flex-wrap items-center gap-3 px-4 sm:px-6 py-4 shrink-0">
           <button onClick={() => navigate("/orders")} className="bg-[#262626] text-white p-2 rounded-lg">
             <FaArrowLeft />
           </button>
           <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wider">New Order</h1>
-          <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-lg px-4 py-2 ml-auto w-[320px]">
+          <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-lg px-4 py-2 ml-auto w-full sm:w-[320px]">
             <FaSearch className="text-[#ababab]" />
             <input
               value={search}

@@ -24,8 +24,8 @@ const Home = () => {
   const sessionOrders = stats?.totalOrders || 0;
 
   return (
-    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex">
-      <div className="flex-[3] overflow-y-auto scrollbar-hide pb-20">
+    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row">
+      <div className="w-full lg:flex-[3] lg:overflow-y-auto scrollbar-hide pb-4 lg:pb-20">
         <Greetings />
         <div className="w-full px-8 mt-8">
           <div className="max-w-md">
@@ -39,7 +39,7 @@ const Home = () => {
         </div>
         <RecentOrders />
       </div>
-      <div className="flex-[2] overflow-y-auto scrollbar-hide pb-20">
+      <div className="w-full lg:flex-[2] lg:overflow-y-auto scrollbar-hide pb-20">
         <PopularDishes />
       </div>
       <BottomNav />
