@@ -1,9 +1,11 @@
 import React, { useMemo } from "react";
+import { useNavigate } from "react-router-dom";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { popularDishes } from "../../constants";
 import { getOrders } from "../../https/index";
 
 const PopularDishes = () => {
+  const navigate = useNavigate();
   const { data: resData } = useQuery({
     queryKey: ["orders"],
     queryFn: async () => getOrders(),
@@ -33,9 +35,9 @@ const PopularDishes = () => {
           <h1 className="text-[#f5f5f5] text-lg font-semibold tracking-wide">
             Popular Dishes
           </h1>
-          <a href="" className="text-[#025cca] text-sm font-semibold">
+          <button onClick={() => navigate("/dishes")} className="text-[#025cca] text-sm font-semibold">
             View all
-          </a>
+          </button>
         </div>
 
         <div className="overflow-y-scroll h-[680px] scrollbar-hide">

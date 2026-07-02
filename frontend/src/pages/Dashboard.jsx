@@ -7,12 +7,14 @@ import PendingPayments from "../components/dashboard/PendingPayments";
 import ManageStaff from "../components/dashboard/ManageStaff";
 import MenuManagement from "../components/dashboard/MenuManagement";
 import Modal from "../components/dashboard/Modal";
+import AddCategoryModal from "../components/dashboard/AddCategoryModal";
+import AddItemModal from "../components/dashboard/AddItemModal";
 import BottomNav from "../components/shared/BottomNav";
 
 const buttons = [
   { label: "Add Table", icon: <MdTableBar />, action: "table" },
   { label: "Add Category", icon: <MdCategory />, action: "category" },
-  { label: "Add Dishes", icon: <BiSolidDish />, action: "dishes" },
+  { label: "Add Item", icon: <BiSolidDish />, action: "item" },
 ];
 
 const tabs = ["Metrics", "Orders", "Payments", "Staff", "Menu"];
@@ -23,10 +25,14 @@ const Dashboard = () => {
   }, []);
 
   const [isTableModalOpen, setIsTableModalOpen] = useState(false);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
+  const [showItemModal, setShowItemModal] = useState(false);
   const [activeTab, setActiveTab] = useState("Metrics");
 
   const handleOpenModal = (action) => {
     if (action === "table") setIsTableModalOpen(true);
+    if (action === "category") setShowCategoryModal(true);
+    if (action === "item") setShowItemModal(true);
   };
 
   return (
@@ -72,6 +78,8 @@ const Dashboard = () => {
       {isTableModalOpen && (
         <Modal setIsTableModalOpen={setIsTableModalOpen} />
       )}
+      {showCategoryModal && <AddCategoryModal onClose={() => setShowCategoryModal(false)} />}
+      {showItemModal && <AddItemModal onClose={() => setShowItemModal(false)} />}
 
       <BottomNav />
     </div>

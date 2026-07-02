@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { menus } from "../../constants";
@@ -15,9 +15,14 @@ const MODES = [
 
 const Metrics = () => {
   const navigate = useNavigate();
-  const [mode, setMode] = useState("session");
-  const [customFrom, setCustomFrom] = useState("");
-  const [customTo, setCustomTo] = useState("");
+  // Persist the selected view so it survives navigating into a metric detail page and back.
+  const [mode, setMode] = useState(() => localStorage.getItem("zz_metricsMode") || "session");
+  const [customFrom, setCustomFrom] = useState(() => localStorage.getItem("zz_metricsFrom") || "");
+  const [customTo, setCustomTo] = useState(() => localStorage.getItem("zz_metricsTo") || "");
+
+  useEffect(() => { localStorage.setItem("zz_metricsMode", mode); }, [mode]);
+  useEffect(() => { localStorage.setItem("zz_metricsFrom", customFrom); }, [customFrom]);
+  useEffect(() => { localStorage.setItem("zz_metricsTo", customTo); }, [customTo]);
 
   const range = useMemo(() => {
     const end = new Date().toISOString();
