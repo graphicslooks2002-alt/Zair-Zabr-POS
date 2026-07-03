@@ -31,6 +31,9 @@ export const addOrder = (data) => axiosWrapper.post("/api/order/", data);
 export const getOrders = () => axiosWrapper.get("/api/order");
 export const updateOrderStatus = ({ orderId, orderStatus }) =>
   axiosWrapper.put(`/api/order/${orderId}`, { orderStatus });
+// Edit an existing order's items/quantities/discount; revenue recalculates server-side.
+export const updateOrderItems = ({ orderId, items, bills, discount }) =>
+  axiosWrapper.put(`/api/order/${orderId}`, { items, bills, discount });
 export const settleOrder = (orderId) =>
   axiosWrapper.put(`/api/order/${orderId}/settle`);
 

@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { FaLongArrowAltRight } from "react-icons/fa";
+import { FaLongArrowAltRight, FaEdit } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { formatDateAndTime, getAvatarName } from "../../utils/index";
 import { settleOrder } from "../../https/index";
 import Invoice from "../invoice/Invoice";
+import EditOrderModal from "./EditOrderModal";
 
 const OrderCard = ({ order }) => {
   const queryClient = useQueryClient();
   const [showInvoice, setShowInvoice] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
 
   const isPending = order.paymentStatus === "Pending";
 
@@ -80,6 +82,12 @@ const OrderCard = ({ order }) => {
           </button>
         )}
         <button
+          onClick={() => setShowEdit(true)}
+          className="flex items-center justify-center gap-1.5 flex-1 bg-[#e85d04] text-white py-2 rounded-lg text-sm font-semibold"
+        >
+          <FaEdit size={13} /> Edit
+        </button>
+        <button
           onClick={() => setShowInvoice(true)}
           className="flex-1 bg-[#025cca] text-white py-2 rounded-lg text-sm font-semibold"
         >
@@ -88,6 +96,7 @@ const OrderCard = ({ order }) => {
       </div>
 
       {showInvoice && <Invoice orderInfo={order} setShowInvoice={setShowInvoice} />}
+      {showEdit && <EditOrderModal order={order} onClose={() => setShowEdit(false)} />}
     </div>
   );
 };

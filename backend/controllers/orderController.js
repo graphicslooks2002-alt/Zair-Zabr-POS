@@ -115,25 +115,66 @@ const getOrders = async (req, res, next) => {
   }
 };
 
-// Legacy status update (kept for compatibility; status workflow is deprecated).
+// Edit an existing order: change items / quantities / discount and recompute the bill.
+// Revenue follows automatically because the reports read bills.totalWithTax.
+// (Also still accepts a legacy orderStatus for backward compatibility.)
 const updateOrder = async (req, res, next) => {
   try {
-    const { orderStatus } = req.body;
+    const { orderStatus, items, bills, discount } = req.body;
     const { id } = req.params;
 
     if (!UUID_RE.test(id)) {
       return next(createHttpError(404, "Invalid id!"));
     }
 
+    const patch = { updated_at: new Date().toISOString() };
+
+    // Legacy status field.
+    if (orderStatus !== undefined) patch.order_status = orderStatus;
+
+    // Edited item list.
+    if (items !== undefined) {
+      if (!Array.isArray(items) || items.length === 0) {
+        return next(createHttpError(400, "An order must have at least one item. To cancel, delete the order instead."));
+      }
+      patch.items = items;
+    }
+
+    // Recomputed bill.
+    if (bills !== undefined) {
+      if (!bills || !isNonNegativeNumber(bills.totalWithTax)) {
+        return next(createHttpError(400, "Something's wrong with the order total. Please review and try again."));
+      }
+      patch.bills = bills;
+    }
+
+    // Recomputed discount.
+    if (discount !== undefined) patch.discount_amount = discount?.amount || 0;
+
     const { data, error } = await supabase
       .from("orders")
-      .update({ order_status: orderStatus, updated_at: new Date().toISOString() })
+      .update(patch)
       .eq("id", id)
       .select(ORDER_SELECT)
       .single();
 
     if (error || !data) {
       return next(createHttpError(404, "Order not found!"));
+    }
+
+    // Keep the pending-payments tracker in sync (only rows still awaiting payment).
+    if (items !== undefined || bills !== undefined) {
+      const pendingPatch = { updated_at: new Date().toISOString() };
+      if (items !== undefined) pendingPatch.items = items;
+      if (bills !== undefined) {
+        pendingPatch.total_amount = bills.totalWithTax || 0;
+        pendingPatch.pending_amount = bills.totalWithTax || 0;
+      }
+      await supabase
+        .from("pending_payments")
+        .update(pendingPatch)
+        .eq("order_id", id)
+        .eq("payment_status", "Pending");
     }
 
     res.status(200).json({ success: true, message: "Order updated", data });
