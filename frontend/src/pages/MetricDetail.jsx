@@ -112,7 +112,7 @@ const MetricDetail = () => {
               {rows.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No matching orders.</td></tr>
               ) : (
-                rows.map((o) => (
+                rows.slice(0, 300).map((o) => (
                   <tr key={o._id} className="border-b border-[#262626]">
                     <td className="px-4 py-3">#{o._id.slice(-6)}</td>
                     <td className="px-4 py-3">{o.customerDetails?.name}</td>
@@ -151,6 +151,9 @@ const MetricDetail = () => {
                     </td>
                   </tr>
                 ))
+              )}
+              {rows.length > 300 && (
+                <tr><td colSpan={7} className="px-4 py-3 text-center text-gray-500 text-xs">Showing first 300 of {rows.length}. Narrow the range to see fewer.</td></tr>
               )}
             </tbody>
           </table>

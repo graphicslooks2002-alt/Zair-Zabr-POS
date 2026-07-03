@@ -112,21 +112,33 @@ const Metrics = () => {
   const exportCsv = () => {
     if (!stats) return;
     const label = mode === "session" ? "Current Session" : MODES.find((m) => m.key === mode)?.label;
-    const lines = [
-      ["Zair Zabar POS — Report", label],
+    const fromISO = mode === "session" ? session?.opened_at : range?.from;
+    const toISO = mode === "session" ? session?.closes_at : range?.to;
+    const fmt = (d) => (d ? new Date(d).toLocaleString() : "—");
+    // CSV-escape any cell containing comma/quote/newline (dates from toLocaleString have commas).
+    const cell = (v) => {
+      const s = String(v ?? "");
+      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+    };
+    const rows = [
+      ["Zair Zabar POS — Performance Report"],
+      ["Period", label],
+      ["From", fmt(fromISO)],
+      ["To", fmt(toISO)],
       ["Generated", new Date().toLocaleString()],
       [],
-      ["Total Revenue", stats.totalRevenue],
+      ["Metric", "Value"],
+      ["Total Revenue (Rs)", stats.totalRevenue],
       ["Total Orders", stats.totalOrders],
       ["Paid Payments", stats.paidPayments],
       ["Pending Payments", stats.pendingPayments],
-      ["Pending Amount", stats.pendingAmount],
-      ["Discounts Given", stats.discountsGiven],
-      ["Online Payments", stats.onlinePayments],
-      ["Cash Payments", stats.cashPayments],
+      ["Pending Amount (Rs)", stats.pendingAmount],
+      ["Discounts Given (Rs)", stats.discountsGiven],
+      ["Online Payments (Rs)", stats.onlinePayments],
+      ["Cash Payments (Rs)", stats.cashPayments],
     ];
-    const csv = lines.map((r) => r.join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv" });
+    const csv = rows.map((r) => r.map(cell).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -190,7 +202,7 @@ const Metrics = () => {
           <button
             key={c.key}
             onClick={() => openDetail(c.key)}
-            className="text-left shadow-sm rounded-lg p-4 transition-transform hover:scale-[1.02] hover:brightness-110 cursor-pointer"
+            className="text-left shadow-sm rounded-lg p-4 hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: c.color }}
           >
             <p className="font-medium text-xs text-[#f5f5f5]">{c.title}</p>

@@ -10,10 +10,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      staleTime : 30000,
-    }
-  }
-})
+      staleTime: 30000,
+      gcTime: 5 * 60 * 1000,
+      refetchOnWindowFocus: false, // no heavy refetch when tabbing back (POS)
+      refetchOnReconnect: false,
+      retry: 1,
+    },
+  },
+});
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
