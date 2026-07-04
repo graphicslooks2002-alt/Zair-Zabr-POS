@@ -204,7 +204,7 @@ const CreateOrder = () => {
         </div>
 
         {!q && (
-          <div className="flex gap-2 px-6 pb-2 overflow-x-auto scrollbar-hide shrink-0">
+          <div className="flex gap-2 px-6 pb-2 overflow-x-auto">
             {menus.map((m) => (
               <button
                 key={m.id}
