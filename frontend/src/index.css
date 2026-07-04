@@ -36,3 +36,24 @@ body {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }
+
+/* Themed scrollbar matching dark POS scheme */
+.scrollbar-themed {
+  scrollbar-width: thin;               /* Firefox */
+  scrollbar-color: #383838 #1a1a1a;    /* thumb track */
+}
+.scrollbar-themed::-webkit-scrollbar {
+  height: 6px;
+  width: 6px;
+}
+.scrollbar-themed::-webkit-scrollbar-track {
+  background: #1a1a1a;
+  border-radius: 8px;
+}
+.scrollbar-themed::-webkit-scrollbar-thumb {
+  background: #383838;
+  border-radius: 8px;
+}
+.scrollbar-themed::-webkit-scrollbar-thumb:hover {
+  background: #e85d04;                  /* accent orange */
+}
