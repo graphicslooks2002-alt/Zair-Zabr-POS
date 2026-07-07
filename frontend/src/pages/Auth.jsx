@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import restaurant from "../assets/images/restaurant-img.jpg"
 import logo from "../assets/images/logo.png"
-import Register from "../components/auth/Register";
 import Login from "../components/auth/Login";
 import ForgotPassword from "../components/auth/ForgotPassword";
 
@@ -11,7 +10,8 @@ const Auth = () => {
     document.title = "Zair Zabar POS | Auth"
   }, [])
 
-  const [isRegister, setIsRegister] = useState(false);
+  // Sign-in only. Staff accounts are created by an admin/owner in Manage Staff —
+  // there is no public sign-up.
   const [isForgot, setIsForgot] = useState(false);
 
   return (
@@ -41,14 +41,12 @@ const Auth = () => {
         </div>
 
         <h2 className="text-4xl text-center mt-10 font-semibold text-[#e85d04] mb-10">
-          {isForgot ? "Forgot Password" : isRegister ? "Employee Registration" : "Employee Login"}
+          {isForgot ? "Forgot Password" : "Employee Login"}
         </h2>
 
         {/* Components */}
         {isForgot ? (
           <ForgotPassword onBack={() => setIsForgot(false)} />
-        ) : isRegister ? (
-          <Register setIsRegister={setIsRegister} />
         ) : (
           <>
             <Login />
@@ -59,19 +57,6 @@ const Auth = () => {
             </div>
           </>
         )}
-
-        {!isForgot && (
-          <div className="flex justify-center mt-6">
-            <p className="text-sm text-[#ababab]">
-              {isRegister ? "Already have an account?" : "Don't have an account?"}
-              <a onClick={() => setIsRegister(!isRegister)} className="text-[#e85d04] font-semibold hover:underline ml-1" href="#">
-                {isRegister ? "Sign in" : "Sign up"}
-              </a>
-            </p>
-          </div>
-        )}
-
-
       </div>
     </div>
   );
