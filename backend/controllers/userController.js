@@ -82,7 +82,7 @@ const register = async (req, res, next) => {
       return next(createHttpError(400, `Role must be one of: ${ROLES.join(", ")}`));
     } else if (role === "Superadmin" && req.user?.role !== "Superadmin") {
       // Only an owner (Superadmin) can mint another Superadmin.
-      return next(createHttpError(403, "Only the owner can create a Superadmin account."));
+      return next(createHttpError(403, "You are not authorized to assign this role."));
     }
 
     const { data: existing } = await supabase
@@ -331,7 +331,7 @@ const login = async (req, res, next) => {
       return next(createHttpError(403, "Your account is pending admin approval. You'll be able to log in once approved."));
     }
     if (user.is_blocked) {
-      return next(createHttpError(403, "Your access has been suspended by the owner. Please contact the owner."));
+      return next(createHttpError(403, "Your access has been suspended. Please contact your administrator."));
     }
 
     const accessToken = jwt.sign(
@@ -427,7 +427,7 @@ const updateUser = async (req, res, next) => {
         return next(createHttpError(403, "You cannot assign a role at or above your own authority."));
       }
       if (role === "Superadmin" && req.user.role !== "Superadmin") {
-        return next(createHttpError(403, "Only the owner can grant the Superadmin role."));
+        return next(createHttpError(403, "You are not authorized to assign this role."));
       }
       patch.role = role;
     }

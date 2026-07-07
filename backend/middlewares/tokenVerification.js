@@ -25,7 +25,7 @@ const isVerifiedUser = async (req, res, next) => {
     if (error) return next(createHttpError(500, "Could not verify your session."));
     if (!user) return next(createHttpError(401, "Your account no longer exists. Please log in again."));
     if (user.is_blocked) {
-      return next(createHttpError(401, "Your access has been suspended by the owner."));
+      return next(createHttpError(401, "Your access has been suspended. Please contact your administrator."));
     }
 
     req.user = { _id: user.id, role: user.role };
