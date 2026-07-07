@@ -11,7 +11,8 @@ create table if not exists users (
   email       text not null unique,
   phone       text not null,
   password    text not null,            -- bcrypt hash (hashed in Node, not Supabase Auth)
-  role        text not null,            -- "Admin" | "Waiter" | "Cashier"
+  role        text not null,            -- "Superadmin" | "Admin" | "Cashier" | "Waiter"
+  is_blocked  boolean not null default false,  -- owner can suspend any account's login
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
 );

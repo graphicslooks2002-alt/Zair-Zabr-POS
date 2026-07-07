@@ -36,7 +36,7 @@ const adminOrBootstrap = async (req, res, next) => {
       if (err) {
         return next(createHttpError(403, "Your session has expired. Please log in again as an admin."));
       }
-      if (req.user.role !== "Admin") {
+      if (req.user.role !== "Admin" && req.user.role !== "Superadmin") {
         return next(createHttpError(403, "You are not authorized to sign up new staff. Please contact an admin."));
       }
       next();
@@ -46,6 +46,10 @@ const adminOrBootstrap = async (req, res, next) => {
   }
 };
 
-const ROLES = ["Admin", "Cashier", "Waiter"];
+const ROLES = ["Superadmin", "Admin", "Cashier", "Waiter"];
 
-module.exports = { authorize, adminOrBootstrap, ROLES };
+// Authority ranking — higher number = more power. Superadmin (owner) tops it.
+const RANK = { Superadmin: 4, Admin: 3, Cashier: 2, Waiter: 1 };
+const rankOf = (role) => RANK[role] || 0;
+
+module.exports = { authorize, adminOrBootstrap, ROLES, RANK, rankOf };

@@ -8,6 +8,6 @@ const { authorize } = require("../middlewares/authorize");
 const router = express.Router();
 
 router.route("/").get(isVerifiedUser, getPendingPayments);
-router.route("/:id/settle").put(isVerifiedUser, authorize("Admin", "Cashier"), settlePending);
+router.route("/:id/settle").put(isVerifiedUser, authorize("Admin", "Cashier", "Superadmin"), settlePending);
 
 module.exports = router;

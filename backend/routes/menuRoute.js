@@ -17,7 +17,7 @@ const router = express.Router();
 router.route("/").get(isVerifiedUser, getMenu);
 
 // Writes: Admin only.
-const admin = [isVerifiedUser, authorize("Admin")];
+const admin = [isVerifiedUser, authorize("Admin", "Superadmin")];
 
 router.route("/seed").post(...admin, seedMenu);
 

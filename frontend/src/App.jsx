@@ -104,13 +104,14 @@ function ProtectedRoutes({ children }) {
   return children;
 }
 
-// Admin-only pages (statistics / dashboard). Non-admins are sent to Orders.
+// Admin-only pages (statistics / dashboard). Superadmin (owner) has full access too.
+// Everyone else is sent to Orders.
 function AdminRoute({ children }) {
   const { isAuth, role } = useSelector((state) => state.user);
   if (!isAuth) {
     return <Navigate to="/auth" />;
   }
-  if (role !== "Admin") {
+  if (role !== "Admin" && role !== "Superadmin") {
     return <Navigate to="/orders" />;
   }
   return children;

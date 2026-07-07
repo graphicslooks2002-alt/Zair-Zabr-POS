@@ -3,7 +3,7 @@ const supabase = require("../config/supabase");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const config = require("../config/config");
-const { ROLES } = require("../middlewares/authorize");
+const { ROLES, rankOf } = require("../middlewares/authorize");
 const { isEmail, emailDomainExists, isPhone, isStrongPassword, PASSWORD_RULE } = require("../utils/validate");
 const { sendVerifyEmail, sendApprovalEmail, sendResetEmail } = require("../utils/mailer");
 
@@ -11,7 +11,10 @@ const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 const statusOf = (u) =>
-  u.approved ? "Active" : u.email_verified ? "Pending Approval" : "Pending Verification";
+  u.is_blocked ? "Blocked"
+  : u.approved ? "Active"
+  : u.email_verified ? "Pending Approval"
+  : "Pending Verification";
 
 const publicUser = (u) => ({
   _id: u.id,
@@ -21,6 +24,7 @@ const publicUser = (u) => ({
   role: u.role,
   emailVerified: !!u.email_verified,
   approved: !!u.approved,
+  isBlocked: !!u.is_blocked,
   status: statusOf(u),
 });
 
@@ -76,6 +80,9 @@ const register = async (req, res, next) => {
       role = "Admin";
     } else if (!ROLES.includes(role)) {
       return next(createHttpError(400, `Role must be one of: ${ROLES.join(", ")}`));
+    } else if (role === "Superadmin" && req.user?.role !== "Superadmin") {
+      // Only an owner (Superadmin) can mint another Superadmin.
+      return next(createHttpError(403, "Only the owner can create a Superadmin account."));
     }
 
     const { data: existing } = await supabase
@@ -323,6 +330,9 @@ const login = async (req, res, next) => {
     if (!user.approved) {
       return next(createHttpError(403, "Your account is pending admin approval. You'll be able to log in once approved."));
     }
+    if (user.is_blocked) {
+      return next(createHttpError(403, "Your access has been suspended by the owner. Please contact the owner."));
+    }
 
     const accessToken = jwt.sign(
       { _id: user.id, role: user.role },
@@ -349,12 +359,16 @@ const getAllUsers = async (req, res, next) => {
   try {
     const { data, error } = await supabase
       .from("users")
-      .select("id, name, email, phone, role, email_verified, approved, created_at")
+      .select("id, name, email, phone, role, email_verified, approved, is_blocked, created_at")
       .order("created_at", { ascending: false });
 
     if (error) return next(createHttpError(500, error.message));
 
-    res.status(200).json({ success: true, data: data.map(publicUser) });
+    // Owner is fully invisible: Superadmin accounts never appear in the staff list —
+    // not to admins, not to staff, not even to the owner themselves. Nobody knows one exists.
+    const visible = data.filter((u) => u.role !== "Superadmin");
+
+    res.status(200).json({ success: true, data: visible.map(publicUser) });
   } catch (error) {
     next(error);
   }
@@ -383,6 +397,19 @@ const updateUser = async (req, res, next) => {
     const { id } = req.params;
     if (!UUID_RE.test(id)) return next(createHttpError(404, "Invalid staff id."));
 
+    const { data: target } = await supabase.from("users").select("*").eq("id", id).maybeSingle();
+    if (!target) return next(createHttpError(404, "Staff member not found."));
+    // Owner is invisible — non-owners can't even tell an owner account exists.
+    if (target.role === "Superadmin" && req.user.role !== "Superadmin") {
+      return next(createHttpError(404, "Staff member not found."));
+    }
+
+    // Hierarchy: you can only edit accounts you outrank. Editing your own is always allowed.
+    const isSelf = id === req.user._id;
+    if (!isSelf && rankOf(req.user.role) <= rankOf(target.role)) {
+      return next(createHttpError(403, "You cannot modify an account with equal or higher authority."));
+    }
+
     const { name, phone, role, password } = req.body;
     const patch = {};
     if (name !== undefined) {
@@ -393,8 +420,15 @@ const updateUser = async (req, res, next) => {
       if (!isPhone(phone)) return next(createHttpError(400, "Phone must be 11 digits, e.g. 03001234567."));
       patch.phone = String(phone);
     }
-    if (role !== undefined) {
+    if (role !== undefined && role !== target.role) {
       if (!ROLES.includes(role)) return next(createHttpError(400, "Invalid role."));
+      // You can't hand out a role at or above your own authority.
+      if (rankOf(role) >= rankOf(req.user.role) && req.user.role !== "Superadmin") {
+        return next(createHttpError(403, "You cannot assign a role at or above your own authority."));
+      }
+      if (role === "Superadmin" && req.user.role !== "Superadmin") {
+        return next(createHttpError(403, "Only the owner can grant the Superadmin role."));
+      }
       patch.role = role;
     }
     if (password) {
@@ -418,6 +452,16 @@ const deleteUser = async (req, res, next) => {
     if (id === req.user._id) {
       return next(createHttpError(400, "You cannot delete your own account."));
     }
+
+    const { data: target } = await supabase.from("users").select("role").eq("id", id).maybeSingle();
+    if (!target) return next(createHttpError(404, "Staff member not found."));
+    if (target.role === "Superadmin" && req.user.role !== "Superadmin") {
+      return next(createHttpError(404, "Staff member not found."));
+    }
+    if (rankOf(req.user.role) <= rankOf(target.role)) {
+      return next(createHttpError(403, "You cannot delete an account with equal or higher authority."));
+    }
+
     const { error } = await supabase.from("users").delete().eq("id", id);
     if (error) return next(createHttpError(500, error.message));
     res.status(200).json({ success: true, message: "Staff deleted." });
@@ -425,6 +469,43 @@ const deleteUser = async (req, res, next) => {
     next(error);
   }
 };
+
+// PUT /api/user/:id/block  and  /:id/unblock  (Superadmin/owner only).
+// Blocking suspends login for ANY role — admins included. Owners can't be blocked.
+const setBlocked = (blocked) => async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!UUID_RE.test(id)) return next(createHttpError(404, "Invalid staff id."));
+    if (id === req.user._id) {
+      return next(createHttpError(400, "You cannot block your own account."));
+    }
+
+    const { data: target } = await supabase.from("users").select("*").eq("id", id).maybeSingle();
+    if (!target) return next(createHttpError(404, "Staff member not found."));
+    if (target.role === "Superadmin") {
+      return next(createHttpError(403, "An owner (Superadmin) account cannot be blocked."));
+    }
+
+    const { data, error } = await supabase
+      .from("users")
+      .update({ is_blocked: blocked })
+      .eq("id", id)
+      .select("*")
+      .single();
+    if (error || !data) return next(createHttpError(404, "Staff member not found."));
+
+    res.status(200).json({
+      success: true,
+      message: blocked ? `${data.name}'s access has been suspended.` : `${data.name}'s access has been restored.`,
+      data: publicUser(data),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const blockUser = setBlocked(true);
+const unblockUser = setBlocked(false);
 
 const logout = async (req, res, next) => {
   try {
@@ -435,4 +516,4 @@ const logout = async (req, res, next) => {
   }
 };
 
-module.exports = { register, login, verifyEmail, approveUser, resendVerification, forgotPassword, resetPassword, getUserData, getAllUsers, updateUser, deleteUser, logout };
+module.exports = { register, login, verifyEmail, approveUser, resendVerification, forgotPassword, resetPassword, getUserData, getAllUsers, updateUser, deleteUser, blockUser, unblockUser, logout };

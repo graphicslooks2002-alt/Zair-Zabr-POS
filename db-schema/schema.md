@@ -17,7 +17,8 @@ Stores employee/staff accounts.
 | email | String | Yes | Unique, validated format |
 | phone | Number | Yes | 10-11 digits (Pakistan) |
 | password | String | Yes | Bcrypt hashed (salt: 10) |
-| role | String | Yes | "Admin", "Waiter", "Cashier" |
+| role | String | Yes | "Superadmin", "Admin", "Cashier", "Waiter" |
+| is_blocked | Boolean | auto | Owner-suspended accounts can't log in (default false) |
 | createdAt | Date | auto | Timestamp |
 | updatedAt | Date | auto | Timestamp |
 

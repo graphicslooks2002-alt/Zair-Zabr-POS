@@ -9,7 +9,7 @@ const BottomNav = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { role } = useSelector((state) => state.user);
-  const isAdmin = role === "Admin";
+  const isAdmin = role === "Admin" || role === "Superadmin";
 
   const isActive = (path) => location.pathname === path;
   const cls = (path) =>

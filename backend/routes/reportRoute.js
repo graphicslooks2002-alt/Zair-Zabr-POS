@@ -12,7 +12,7 @@ const { authorize } = require("../middlewares/authorize");
 const router = express.Router();
 
 // Reports / statistics → Admin only.
-router.use(isVerifiedUser, authorize("Admin"));
+router.use(isVerifiedUser, authorize("Admin", "Superadmin"));
 
 router.route("/daily").get(getDaily);
 router.route("/weekly").get(getWeekly);

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { FaPlus, FaTimes, FaEdit, FaTrash, FaPaperPlane, FaEye, FaEyeSlash, FaCheck } from "react-icons/fa";
-import { getUsers, register, updateUser, deleteUser, resendVerification } from "../../https/index";
+import { FaPlus, FaTimes, FaEdit, FaTrash, FaPaperPlane, FaEye, FaEyeSlash, FaCheck, FaBan, FaUnlock, FaCrown } from "react-icons/fa";
+import { getUsers, register, updateUser, deleteUser, resendVerification, blockUser, unblockUser } from "../../https/index";
 
-const ROLES = ["Admin", "Cashier", "Waiter"];
+const BASE_ROLES = ["Admin", "Cashier", "Waiter"];
 const empty = { name: "", email: "", phone: "", password: "", role: "Waiter" };
 
 const isStrong = (p) => /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).{8,}$/.test(p);
@@ -18,6 +19,11 @@ const pwdChecks = (p) => [
 
 const ManageStaff = () => {
   const queryClient = useQueryClient();
+  const { _id: myId, role: myRole } = useSelector((state) => state.user);
+  const isOwner = myRole === "Superadmin"; // owner unlocks block/unblock + Superadmin role
+  // Owner can also mint other owners; everyone else picks from the base roles.
+  const ROLES = isOwner ? ["Superadmin", ...BASE_ROLES] : BASE_ROLES;
+
   const [showModal, setShowModal] = useState(false);
   const [editingId, setEditingId] = useState(null); // null = add mode
   const [form, setForm] = useState(empty);
@@ -68,6 +74,11 @@ const ManageStaff = () => {
     onSuccess: (res) => enqueueSnackbar(res?.data?.message || "Verification email resent.", { variant: "success", autoHideDuration: 6000 }),
     onError: (err) => onErr(err, "Failed to resend verification."),
   });
+  const blockMutation = useMutation({
+    mutationFn: ({ id, blocked }) => (blocked ? blockUser(id) : unblockUser(id)),
+    onSuccess: (res) => { refresh(); enqueueSnackbar(res?.data?.message || "Access updated.", { variant: "success" }); },
+    onError: (err) => onErr(err, "Failed to update access."),
+  });
 
   const openAdd = () => { setEditingId(null); setForm(empty); setShowModal(true); };
   const openEdit = (u) => { setEditingId(u._id); setForm({ name: u.name, email: u.email, phone: u.phone, password: "", role: u.role }); setShowModal(true); };
@@ -106,8 +117,12 @@ const ManageStaff = () => {
     <div className="container mx-auto py-2 px-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="font-semibold text-[#f5f5f5] text-xl">Manage Staff</h2>
-          <p className="text-sm text-[#ababab]">Add, edit, or remove employee accounts.</p>
+          <h2 className="font-semibold text-[#f5f5f5] text-xl flex items-center gap-2">
+            Manage Staff {isOwner && <span className="inline-flex items-center gap-1 text-xs bg-[#4a3a1a] text-[#f6b100] px-2 py-0.5 rounded-lg"><FaCrown size={10} /> Owner</span>}
+          </h2>
+          <p className="text-sm text-[#ababab]">
+            {isOwner ? "Full control — add, edit, remove, and suspend any account including admins." : "Add, edit, or remove employee accounts."}
+          </p>
         </div>
         <button onClick={openAdd} className="flex items-center gap-2 bg-[#e85d04] text-white font-semibold rounded-lg px-5 py-2.5">
           <FaPlus /> Add Staff
@@ -136,19 +151,27 @@ const ManageStaff = () => {
                   <td className="px-4 py-3">{u.email}</td>
                   <td className="px-4 py-3">{u.phone}</td>
                   <td className="px-4 py-3">
-                    <span className={`px-2 py-1 rounded-lg text-xs ${
-                      u.role === "Admin" ? "bg-[#3a2e4a] text-[#c79bff]" : u.role === "Cashier" ? "bg-[#2e3a4a] text-[#9bc7ff]" : "bg-[#2e4a40] text-green-400"
-                    }`}>{u.role}</span>
+                    <span className={`px-2 py-1 rounded-lg text-xs inline-flex items-center gap-1 ${
+                      u.role === "Superadmin" ? "bg-[#4a3a1a] text-[#f6b100]" : u.role === "Admin" ? "bg-[#3a2e4a] text-[#c79bff]" : u.role === "Cashier" ? "bg-[#2e3a4a] text-[#9bc7ff]" : "bg-[#2e4a40] text-green-400"
+                    }`}>{u.role === "Superadmin" && <FaCrown size={10} />}{u.role === "Superadmin" ? "Owner" : u.role}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-lg text-xs ${
-                      u.status === "Active" ? "bg-[#2e4a40] text-green-400" : u.status === "Pending Approval" ? "bg-[#4a452e] text-[#f6b100]" : "bg-[#3a3a3a] text-[#ababab]"
+                      u.status === "Blocked" ? "bg-[#4a2e2e] text-red-400" : u.status === "Active" ? "bg-[#2e4a40] text-green-400" : u.status === "Pending Approval" ? "bg-[#4a452e] text-[#f6b100]" : "bg-[#3a3a3a] text-[#ababab]"
                     }`}>{u.status || "Active"}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex gap-3 justify-end">
-                      {u.status !== "Active" && (
+                      {u.status !== "Active" && u.status !== "Blocked" && (
                         <button onClick={() => resendMutation.mutate(u._id)} disabled={resendMutation.isPending} className="text-[#f6b100]" title="Resend verification email"><FaPaperPlane /></button>
+                      )}
+                      {/* Owner-only: suspend/restore access for any role. Can't target self or another owner. */}
+                      {isOwner && u._id !== myId && u.role !== "Superadmin" && (
+                        u.isBlocked ? (
+                          <button onClick={() => blockMutation.mutate({ id: u._id, blocked: false })} disabled={blockMutation.isPending} className="text-green-400" title="Restore access"><FaUnlock /></button>
+                        ) : (
+                          <button onClick={() => { if (window.confirm(`Suspend ${u.name}'s access? They won't be able to log in.`)) blockMutation.mutate({ id: u._id, blocked: true }); }} disabled={blockMutation.isPending} className="text-red-400" title="Suspend access"><FaBan /></button>
+                        )
                       )}
                       <button onClick={() => openEdit(u)} className="text-[#025cca]" title="Edit"><FaEdit /></button>
                       <button onClick={() => { if (window.confirm(`Delete ${u.name}?`)) deleteMutation.mutate(u._id); }} className="text-red-500" title="Delete"><FaTrash /></button>
@@ -201,11 +224,11 @@ const ManageStaff = () => {
               </div>
               <div>
                 <label className="block text-[#ababab] text-xs mb-1">Role</label>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                   {ROLES.map((r) => (
                     <button type="button" key={r} onClick={() => setForm((f) => ({ ...f, role: r }))}
-                      className={`flex-1 py-2 rounded-lg text-sm font-semibold ${form.role === r ? "bg-[#e85d04] text-white" : "bg-[#1f1f1f] text-[#ababab]"}`}>
-                      {r}
+                      className={`flex-1 min-w-[80px] py-2 rounded-lg text-sm font-semibold inline-flex items-center justify-center gap-1 ${form.role === r ? "bg-[#e85d04] text-white" : "bg-[#1f1f1f] text-[#ababab]"}`}>
+                      {r === "Superadmin" && <FaCrown size={11} />}{r === "Superadmin" ? "Owner" : r}
                     </button>
                   ))}
                 </div>

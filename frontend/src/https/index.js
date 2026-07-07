@@ -12,6 +12,9 @@ export const getUsers = () => axiosWrapper.get("/api/user/all");
 export const updateUser = (id, data) => axiosWrapper.put(`/api/user/${id}`, data);
 export const deleteUser = (id) => axiosWrapper.delete(`/api/user/${id}`);
 export const resendVerification = (id) => axiosWrapper.post(`/api/user/${id}/resend-verify`);
+// Owner-only: suspend / restore any account's login access (any role).
+export const blockUser = (id) => axiosWrapper.put(`/api/user/${id}/block`);
+export const unblockUser = (id) => axiosWrapper.put(`/api/user/${id}/unblock`);
 export const logout = () => axiosWrapper.post("/api/user/logout");
 
 // Table Endpoints
