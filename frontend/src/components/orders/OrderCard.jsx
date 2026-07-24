@@ -38,15 +38,13 @@ const OrderCard = ({ order }) => {
               {order.customerDetails.name}
             </h1>
             <p className="text-muted text-sm">
-              #{order._id.slice(-6)} / {order.orderType || (order.table ? "Dine in" : "Take Away")}
+              #{order._id.slice(-6)} / {order.orderType || (order.table ? "Dine In" : "Take Away")}
             </p>
-            <p className="text-muted text-sm">
-              {order.table ? (
-                <>Table <FaLongArrowAltRight className="text-muted ml-2 inline" /> {order.table.tableNo}</>
-              ) : (
-                "Takeaway"
-              )}
-            </p>
+            {order.table && (
+              <p className="text-muted text-sm flex items-center">
+                Table <FaLongArrowAltRight className="text-muted mx-2 inline" /> {order.table.tableNo}
+              </p>
+            )}
           </div>
           <div className="flex flex-col items-end gap-2">
             <p

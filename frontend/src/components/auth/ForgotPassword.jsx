@@ -39,7 +39,7 @@ const ForgotPassword = ({ onBack }) => {
   return (
     <form onSubmit={submit}>
       <p className="text-muted text-sm mb-4">Enter your email and we'll send you a reset link.</p>
-      <label className="block text-muted mb-1.5 text-sm font-medium">Employee Email</label>
+      <label className="block text-muted mb-1.5 text-sm font-medium">Email</label>
       <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-base border border-line focus-within:border-accent transition-colors">
         <input
           type="email"

@@ -39,7 +39,7 @@ const Auth = () => {
 
           {/* Heading */}
           <h2 className="text-2xl sm:text-3xl text-center mt-8 font-bold text-main">
-            {isForgot ? "Forgot Password" : "Employee Login"}
+            {isForgot ? "Forgot Password" : "Sign In"}
           </h2>
           <p className="text-center text-muted text-sm mt-1 mb-8">
             {isForgot ? "Reset your account password." : "Sign in to your account to continue."}

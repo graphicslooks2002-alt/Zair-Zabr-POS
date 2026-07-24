@@ -50,7 +50,7 @@ const Login = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-muted mb-1.5 text-sm font-medium">
-            Employee Email
+            Email
           </label>
           <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-base border border-line focus-within:border-accent transition-colors">
             <FaEnvelope className="text-muted shrink-0" />
@@ -59,7 +59,7 @@ const Login = () => {
               name="email"
               value={formData.email}
               onChange={handleChange}
-              placeholder="Enter employee email"
+              placeholder="Enter your email"
               className="bg-transparent flex-1 min-w-0 text-main placeholder:text-faint focus:outline-none"
               required
             />
