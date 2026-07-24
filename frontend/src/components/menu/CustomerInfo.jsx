@@ -9,17 +9,17 @@ const CustomerInfo = () => {
   return (
     <div className="flex items-center justify-between px-4 py-3">
       <div className="flex flex-col items-start">
-        <h1 className="text-md text-[#f5f5f5] font-semibold tracking-wide">
+        <h1 className="text-md text-main font-semibold tracking-wide">
           {customerData.customerName || "Customer Name"}
         </h1>
-        <p className="text-xs text-[#ababab] font-medium mt-1">
+        <p className="text-xs text-muted font-medium mt-1">
           #{customerData.orderId || "N/A"} / {customerData.table ? "Dine In" : "Takeaway"}
         </p>
-        <p className="text-xs text-[#ababab] font-medium mt-2">
+        <p className="text-xs text-muted font-medium mt-2">
           {formatDate(dateTime)}
         </p>
       </div>
-      <button className="bg-[#e85d04] p-3 text-xl font-bold rounded-lg">
+      <button className="bg-accent p-3 text-xl font-bold rounded-lg">
         {getAvatarName(customerData.customerName) || "CN"}
       </button>
     </div>

@@ -30,12 +30,12 @@ const PopularDishes = () => {
 
   return (
     <div className="mt-6 pr-6">
-      <div className="bg-[#1a1a1a] w-full rounded-lg">
+      <div className="bg-panel w-full rounded-lg">
         <div className="flex justify-between items-center px-6 py-4">
-          <h1 className="text-[#f5f5f5] text-lg font-semibold tracking-wide">
+          <h1 className="text-main text-lg font-semibold tracking-wide">
             Popular Dishes
           </h1>
-          <button onClick={() => navigate("/dishes")} className="text-[#025cca] text-sm font-semibold">
+          <button onClick={() => navigate("/dishes")} className="text-info text-sm font-semibold">
             View all
           </button>
         </div>
@@ -45,16 +45,16 @@ const PopularDishes = () => {
             return (
               <div
                 key={dish.id}
-                className="flex items-center gap-4 bg-[#1f1f1f] rounded-[15px] px-6 py-4 mt-4 mx-6"
+                className="flex items-center gap-4 bg-base rounded-[15px] px-6 py-4 mt-4 mx-6"
               >
-                <h1 className="text-[#f5f5f5] font-bold text-xl mr-4">{dish.id < 10 ? `0${dish.id}` : dish.id}</h1>
-                <div className="w-[50px] h-[50px] rounded-full bg-[#e85d04] flex items-center justify-center text-white font-bold text-lg">
+                <h1 className="text-main font-bold text-xl mr-4">{dish.id < 10 ? `0${dish.id}` : dish.id}</h1>
+                <div className="w-[50px] h-[50px] rounded-full bg-accent flex items-center justify-center text-white font-bold text-lg">
                   {dish.name.charAt(0)}
                 </div>
                 <div>
-                  <h1 className="text-[#f5f5f5] font-semibold tracking-wide">{dish.name}</h1>
-                  <p className="text-[#f5f5f5] text-sm font-semibold mt-1">
-                    <span className="text-[#ababab]">Orders: </span>
+                  <h1 className="text-main font-semibold tracking-wide">{dish.name}</h1>
+                  <p className="text-main text-sm font-semibold mt-1">
+                    <span className="text-muted">Orders: </span>
                     {dish.numberOfOrders}
                   </p>
                 </div>

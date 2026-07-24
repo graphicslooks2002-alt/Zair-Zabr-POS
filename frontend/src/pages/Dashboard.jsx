@@ -36,28 +36,28 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex flex-col overflow-x-hidden">
-      <div className="container mx-auto flex flex-wrap items-center justify-between gap-3 py-6 px-6 shrink-0">
-        <div className="flex flex-wrap items-center gap-3">
+    <div className="bg-base min-h-[calc(100vh-64px)] flex flex-col overflow-x-hidden">
+      <div className="container mx-auto flex flex-col lg:flex-row lg:flex-wrap lg:items-center lg:justify-between gap-3 py-3 sm:py-6 px-3 sm:px-6 shrink-0">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-3 px-3 lg:mx-0 lg:px-0">
           {buttons.map(({ label, icon, action }) => (
             <button
               key={label}
               onClick={() => handleOpenModal(action)}
-              className="bg-[#1a1a1a] hover:bg-[#262626] px-6 py-3 rounded-lg text-[#f5f5f5] font-semibold text-sm flex items-center gap-2"
+              className="bg-panel hover:bg-surface px-3 py-2 sm:px-6 sm:py-3 rounded-lg text-main font-semibold text-xs sm:text-sm flex items-center gap-2 shrink-0 whitespace-nowrap"
             >
               {label} {icon}
             </button>
           ))}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2 overflow-x-auto scrollbar-hide -mx-3 px-3 lg:mx-0 lg:px-0">
           {tabs.map((tab) => (
             <button
               key={tab}
-              className={`px-6 py-3 rounded-lg text-[#f5f5f5] font-semibold text-sm ${
+              className={`px-3 py-2 sm:px-6 sm:py-3 rounded-lg text-main font-semibold text-xs sm:text-sm shrink-0 whitespace-nowrap ${
                 activeTab === tab
-                  ? "bg-[#262626]"
-                  : "bg-[#1a1a1a] hover:bg-[#262626]"
+                  ? "bg-surface"
+                  : "bg-panel hover:bg-surface"
               }`}
               onClick={() => setActiveTab(tab)}
             >
@@ -67,7 +67,7 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto scrollbar-hide pb-20 px-6">
+      <div className="flex-1 overflow-y-auto scrollbar-hide pb-20 px-3 sm:px-6">
         {activeTab === "Metrics" && <Metrics />}
         {activeTab === "Orders" && <RecentOrders />}
         {activeTab === "Payments" && <PendingPayments />}

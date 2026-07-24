@@ -27,38 +27,38 @@ const ForgotPassword = ({ onBack }) => {
   if (sent) {
     return (
       <div className="text-center">
-        <p className="text-[#f5f5f5] mb-2">📧 Check your inbox</p>
-        <p className="text-[#ababab] text-sm mb-6">
+        <p className="text-main mb-2">📧 Check your inbox</p>
+        <p className="text-muted text-sm mb-6">
           If an account exists for <b>{email}</b>, we've sent a password reset link. It expires in 30 minutes.
         </p>
-        <button onClick={onBack} className="text-[#e85d04] font-semibold hover:underline">Back to login</button>
+        <button onClick={onBack} className="text-accent font-semibold hover:underline">Back to login</button>
       </div>
     );
   }
 
   return (
     <form onSubmit={submit}>
-      <p className="text-[#ababab] text-sm mb-4">Enter your email and we'll send you a reset link.</p>
-      <label className="block text-[#ababab] mb-2 text-sm font-medium">Employee Email</label>
-      <div className="flex items-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+      <p className="text-muted text-sm mb-4">Enter your email and we'll send you a reset link.</p>
+      <label className="block text-muted mb-1.5 text-sm font-medium">Employee Email</label>
+      <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-base border border-line focus-within:border-accent transition-colors">
         <input
           type="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           placeholder="Enter your email"
-          className="bg-transparent flex-1 text-white focus:outline-none"
+          className="bg-transparent flex-1 min-w-0 text-main placeholder:text-faint focus:outline-none"
           required
         />
       </div>
       <button
         type="submit"
         disabled={mut.isPending}
-        className="w-full rounded-lg mt-6 py-3 text-lg bg-[#e85d04] text-white font-bold disabled:opacity-60"
+        className="w-full rounded-xl mt-6 py-3 text-lg bg-accent hover:brightness-110 text-white font-bold transition disabled:opacity-60"
       >
         {mut.isPending ? "Sending..." : "Send Reset Link"}
       </button>
       <div className="text-center mt-4">
-        <button type="button" onClick={onBack} className="text-[#e85d04] text-sm font-semibold hover:underline">Back to login</button>
+        <button type="button" onClick={onBack} className="text-accent text-sm font-semibold hover:underline">Back to login</button>
       </div>
     </form>
   );

@@ -4,8 +4,36 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
+/* ---------- Theme tokens ---------- */
+:root {                 /* Dark (default) */
+  --c-base: #1f1f1f;
+  --c-surface: #262626;
+  --c-panel: #1a1a1a;
+  --c-elevated: #333333;
+  --c-hover: #2c2c2c;
+  --c-line: #2a2a2a;
+  --c-main: #f5f5f5;
+  --c-muted: #ababab;
+  --c-faint: #777777;
+}
+:root.light {           /* Light */
+  --c-base: #f3f4f6;
+  --c-surface: #ffffff;
+  --c-panel: #f9fafb;
+  --c-elevated: #e5e7eb;
+  --c-hover: #eef1f4;
+  --c-line: #e5e7eb;
+  --c-main: #1f2937;
+  --c-muted: #6b7280;
+  --c-faint: #9ca3af;
+}
+
+html, body {
   font-family: 'Inter', sans-serif;
+  overflow-x: hidden;   /* guard: no page-wide horizontal scroll on small screens */
+  max-width: 100%;
+  background: var(--c-base);
+  color: var(--c-main);
 }
 
 /* FullScreenLoader.css */

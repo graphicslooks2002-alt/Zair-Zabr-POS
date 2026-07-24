@@ -175,7 +175,7 @@ const CreateOrder = () => {
       return;
     }
     if (payChoice === "Online") return setShowOnlineConfirm(true);
-    if (payChoice === "Pending") return place("Pending", "Pending");
+    if (payChoice === "Pending") return place("Pending", null);
     place("Paid", "Cash");
   };
 
@@ -184,21 +184,21 @@ const CreateOrder = () => {
   }
 
   return (
-    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex overflow-hidden">
+    <div className="bg-base min-h-[calc(100dvh-64px)] lg:h-[calc(100vh-64px)] flex flex-col lg:flex-row lg:overflow-hidden pb-16 lg:pb-0">
       {/* LEFT: menu + search */}
       <div className="flex-1 min-w-0 flex flex-col min-h-0">
         <div className="flex flex-wrap items-center gap-3 px-4 sm:px-6 py-4 shrink-0">
-          <button onClick={() => navigate("/orders")} className="bg-[#262626] text-white p-2 rounded-lg">
+          <button onClick={() => navigate("/orders")} className="bg-surface text-main p-2 rounded-lg">
             <FaArrowLeft />
           </button>
-          <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wider">New Order</h1>
-          <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-lg px-4 py-2 ml-auto w-full sm:w-[320px]">
-            <FaSearch className="text-[#ababab]" />
+          <h1 className="text-main text-2xl font-bold tracking-wider">New Order</h1>
+          <div className="flex items-center gap-2 bg-panel rounded-lg px-4 py-2 ml-auto w-full sm:w-[320px]">
+            <FaSearch className="text-muted" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search any dish or deal..."
-              className="bg-transparent outline-none text-[#f5f5f5] text-sm w-full"
+              className="bg-transparent outline-none text-main text-sm w-full"
             />
           </div>
         </div>
@@ -210,7 +210,7 @@ const CreateOrder = () => {
                 key={m.id}
                 onClick={() => setActiveCategory(m)}
                 className={`px-3 py-2 rounded-lg text-sm font-semibold whitespace-nowrap ${
-                  activeCategory?.id === m.id ? "text-white" : "bg-[#1a1a1a] text-[#ababab]"
+                  activeCategory?.id === m.id ? "text-white" : "bg-panel text-muted"
                 }`}
                 style={{ backgroundColor: activeCategory?.id === m.id ? m.bgColor : undefined }}
               >
@@ -220,7 +220,7 @@ const CreateOrder = () => {
           </div>
         )}
 
-        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-6 py-3">
+        <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto scrollbar-hide px-4 sm:px-6 py-3">
           <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 content-start">
             {visibleItems.length === 0 ? (
               <p className="text-gray-500 col-span-full">No dishes match "{search}".</p>
@@ -231,16 +231,16 @@ const CreateOrder = () => {
                   <button
                     key={`${item.cat || activeCategory?.name}-${item.id}`}
                     onClick={() => addItem(item)}
-                    className="relative bg-[#262626] hover:bg-[#2e2e2e] rounded-lg p-3 text-left"
+                    className="relative bg-surface hover:bg-[#2e2e2e] rounded-lg p-3 text-left"
                   >
                     {inCart && (
-                      <span className="absolute top-2 right-2 bg-[#e85d04] text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                      <span className="absolute top-2 right-2 bg-accent text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
                         {inCart.quantity}
                       </span>
                     )}
-                    <p className="text-[#f5f5f5] text-sm font-semibold leading-tight pr-6">{item.name}</p>
-                    {q && <p className="text-[#777] text-xs mt-0.5">{item.cat}</p>}
-                    <p className="text-[#02ca3a] text-sm mt-1">Rs{item.price}</p>
+                    <p className="text-main text-sm font-semibold leading-tight pr-6">{item.name}</p>
+                    {q && <p className="text-faint text-xs mt-0.5">{item.cat}</p>}
+                    <p className="text-success text-sm mt-1">Rs{item.price}</p>
                   </button>
                 );
               })
@@ -256,33 +256,33 @@ const CreateOrder = () => {
           document.body.style.userSelect = "none";
         }}
         title="Drag to resize"
-        className="w-1.5 shrink-0 cursor-col-resize bg-[#2a2a2a] hover:bg-[#e85d04] transition-colors"
+        className="hidden lg:block w-1.5 shrink-0 cursor-col-resize bg-line hover:bg-accent transition-colors"
       />
 
       {/* RIGHT: cart panel */}
       <div
-        style={{ width: cartWidth }}
-        className="shrink-0 bg-[#1a1a1a] border-l border-[#2a2a2a] flex flex-col min-h-0"
+        style={{ "--cart-w": `${cartWidth}px` }}
+        className="w-full lg:w-[var(--cart-w)] shrink-0 bg-panel border-t lg:border-t-0 lg:border-l border-line flex flex-col lg:min-h-0"
       >
         {/* Scrollable region: customer + items + discount + totals */}
-        <div className="flex-1 min-h-0 overflow-y-auto scrollbar-hide">
-          <div className="p-4 space-y-2 border-b border-[#2a2a2a]">
+        <div className="lg:flex-1 lg:min-h-0 lg:overflow-y-auto scrollbar-hide">
+          <div className="p-4 space-y-2 border-b border-line">
             <input
               value={customerName}
               onChange={(e) => setCustomerName(e.target.value)}
               placeholder="Customer name"
-              className="w-full bg-[#262626] text-white rounded-lg px-3 py-2.5 text-sm outline-none"
+              className="w-full bg-surface text-main rounded-lg px-3 py-2.5 text-sm outline-none"
             />
             <input
               value={customerPhone}
               onChange={(e) => setCustomerPhone(e.target.value)}
               placeholder="Phone number"
-              className="w-full bg-[#262626] text-white rounded-lg px-3 py-2.5 text-sm outline-none"
+              className="w-full bg-surface text-main rounded-lg px-3 py-2.5 text-sm outline-none"
             />
             {presetTable ? (
               <div className="flex items-center justify-between bg-[#2e4a40] text-green-400 rounded-lg px-3 py-2.5 text-sm font-semibold">
                 <span className="flex items-center gap-2"><FaChair /> Dine In · Table {presetTable.tableNo}</span>
-                <button onClick={() => navigate("/tables")} className="text-[#ababab] text-xs underline">change</button>
+                <button onClick={() => navigate("/tables")} className="text-muted text-xs underline">change</button>
               </div>
             ) : (
               <div className="flex gap-2">
@@ -291,7 +291,7 @@ const CreateOrder = () => {
                     key={t}
                     onClick={() => setOrderType(t)}
                     className={`flex-1 py-2 rounded-lg text-sm font-semibold ${
-                      orderType === t ? "bg-[#e85d04] text-white" : "bg-[#262626] text-[#ababab]"
+                      orderType === t ? "bg-accent text-white" : "bg-surface text-muted"
                     }`}
                   >
                     {t}
@@ -303,8 +303,8 @@ const CreateOrder = () => {
 
           {/* Current order heading */}
           <div className="flex items-center justify-between px-4 py-2 bg-[#222] sticky top-0 z-10">
-            <span className="text-[#f5f5f5] text-sm font-semibold">Current Order</span>
-            <span className="text-[#ababab] text-xs">{totalQty} item{totalQty === 1 ? "" : "s"}</span>
+            <span className="text-main text-sm font-semibold">Current Order</span>
+            <span className="text-muted text-xs">{totalQty} item{totalQty === 1 ? "" : "s"}</span>
           </div>
 
           {/* cart items — natural height inside the scroll region */}
@@ -316,15 +316,15 @@ const CreateOrder = () => {
               </div>
             ) : (
               cart.map((i) => (
-                <div key={i.name} className="flex items-center justify-between bg-[#262626] rounded-lg px-3 py-2.5">
+                <div key={i.name} className="flex items-center justify-between bg-surface rounded-lg px-3 py-2.5">
                   <div className="min-w-0 mr-2">
-                    <p className="text-[#f5f5f5] text-sm font-semibold truncate">{i.name}</p>
-                    <p className="text-[#ababab] text-xs mt-0.5">Rs{i.pricePerQuantity} × {i.quantity} = <span className="text-[#02ca3a]">Rs{i.price}</span></p>
+                    <p className="text-main text-sm font-semibold truncate">{i.name}</p>
+                    <p className="text-muted text-xs mt-0.5">Rs{i.pricePerQuantity} × {i.quantity} = <span className="text-success">Rs{i.price}</span></p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <button onClick={() => changeQty(i.name, -1)} className="bg-[#1a1a1a] text-[#e85d04] w-7 h-7 rounded flex items-center justify-center"><FaMinus size={10} /></button>
+                    <button onClick={() => changeQty(i.name, -1)} className="bg-panel text-accent w-7 h-7 rounded flex items-center justify-center"><FaMinus size={10} /></button>
                     <span className="text-white text-sm w-6 text-center font-semibold">{i.quantity}</span>
-                    <button onClick={() => changeQty(i.name, 1)} className="bg-[#1a1a1a] text-[#e85d04] w-7 h-7 rounded flex items-center justify-center"><FaPlus size={10} /></button>
+                    <button onClick={() => changeQty(i.name, 1)} className="bg-panel text-accent w-7 h-7 rounded flex items-center justify-center"><FaPlus size={10} /></button>
                     <button onClick={() => removeItem(i.name)} className="text-red-500 w-7 h-7 flex items-center justify-center ml-0.5"><FaTrash size={12} /></button>
                   </div>
                 </div>
@@ -333,12 +333,12 @@ const CreateOrder = () => {
           </div>
 
           {/* discount + notes + totals */}
-          <div className="px-4 pb-4 space-y-2 border-t border-[#2a2a2a] pt-3">
+          <div className="px-4 pb-4 space-y-2 border-t border-line pt-3">
             <div className="flex items-center gap-2">
               <select
                 value={discountType}
                 onChange={(e) => setDiscountType(e.target.value)}
-                className="bg-[#262626] text-white text-sm rounded-lg px-2 py-2 outline-none"
+                className="bg-surface text-main text-sm rounded-lg px-2 py-2 outline-none"
               >
                 <option value="percent">%</option>
                 <option value="fixed">Rs</option>
@@ -349,16 +349,16 @@ const CreateOrder = () => {
                 value={discountValue}
                 onChange={(e) => setDiscountValue(e.target.value)}
                 placeholder="Discount"
-                className="flex-1 bg-[#262626] text-white rounded-lg px-3 py-2 text-sm outline-none"
+                className="flex-1 bg-surface text-main rounded-lg px-3 py-2 text-sm outline-none"
               />
             </div>
             <input
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
               placeholder="Notes (optional)"
-              className="w-full bg-[#262626] text-white rounded-lg px-3 py-2 text-sm outline-none"
+              className="w-full bg-surface text-main rounded-lg px-3 py-2 text-sm outline-none"
             />
-            <div className="text-sm text-[#ababab] space-y-1 pt-1">
+            <div className="text-sm text-muted space-y-1 pt-1">
               <div className="flex justify-between"><span>Subtotal</span><span>Rs{subtotal.toFixed(0)}</span></div>
               <div className="flex justify-between"><span>Discount</span><span>- Rs{discountAmount.toFixed(0)}</span></div>
             </div>
@@ -366,8 +366,8 @@ const CreateOrder = () => {
         </div>
 
         {/* Pinned footer: total + payment + place order (always visible) */}
-        <div className="shrink-0 border-t border-[#2a2a2a] p-3 space-y-2 bg-[#1a1a1a]">
-          <div className="flex justify-between items-center text-[#f5f5f5] font-bold text-lg px-1">
+        <div className="shrink-0 border-t border-line p-3 space-y-2 bg-panel">
+          <div className="flex justify-between items-center text-main font-bold text-lg px-1">
             <span>Total</span><span>Rs{total.toFixed(0)}</span>
           </div>
           <div className="flex gap-2">
@@ -376,7 +376,7 @@ const CreateOrder = () => {
                 key={p}
                 onClick={() => setPayChoice(p)}
                 className={`flex-1 py-2 rounded-lg text-xs font-semibold ${
-                  payChoice === p ? "bg-[#025cca] text-white" : "bg-[#262626] text-[#ababab]"
+                  payChoice === p ? "bg-info text-white" : "bg-surface text-muted"
                 }`}
               >
                 {p}
@@ -386,7 +386,7 @@ const CreateOrder = () => {
           <button
             onClick={handlePlaceOrder}
             disabled={orderMutation.isPending}
-            className="w-full bg-[#e85d04] text-white py-3 rounded-lg font-semibold disabled:opacity-50"
+            className="w-full bg-accent text-white py-3 rounded-lg font-semibold disabled:opacity-50"
           >
             {orderMutation.isPending ? "Placing..." : "Place Order"}
           </button>
@@ -396,16 +396,16 @@ const CreateOrder = () => {
       {/* Online payment screenshot confirmation */}
       {showOnlineConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[110] p-4">
-          <div className="bg-[#1f1f1f] rounded-lg p-6 w-full max-w-sm text-center">
-            <h3 className="text-[#f5f5f5] text-lg font-semibold mb-2">Online Payment</h3>
-            <p className="text-[#ababab] text-sm mb-5">Has the payment screenshot been received?</p>
+          <div className="bg-base rounded-lg p-6 w-full max-w-sm text-center">
+            <h3 className="text-main text-lg font-semibold mb-2">Online Payment</h3>
+            <p className="text-muted text-sm mb-5">Has the payment screenshot been received?</p>
             <div className="flex flex-col gap-2">
               <button onClick={() => { setShowOnlineConfirm(false); place("Paid", "Online"); }}
-                className="w-full bg-[#02ca3a] text-white py-2.5 rounded-lg font-semibold">Yes — Paid</button>
+                className="w-full bg-success text-white py-2.5 rounded-lg font-semibold">Yes — Paid</button>
               <button onClick={() => { setShowOnlineConfirm(false); place("Pending", "Online"); }}
-                className="w-full bg-[#e85d04] text-white py-2.5 rounded-lg font-semibold">No — Mark Pending Payment</button>
+                className="w-full bg-accent text-white py-2.5 rounded-lg font-semibold">No — Mark Pending Payment</button>
               <button onClick={() => setShowOnlineConfirm(false)}
-                className="w-full bg-[#262626] text-[#ababab] py-2 rounded-lg text-sm">Cancel</button>
+                className="w-full bg-surface text-muted py-2 rounded-lg text-sm">Cancel</button>
             </div>
           </div>
         </div>

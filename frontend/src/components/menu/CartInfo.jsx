@@ -22,27 +22,27 @@ const CartInfo = () => {
     <div className="px-3 py-2">
       <div className="flex items-center justify-between mb-3">
         <h1 className="text-md text-[#e4e4e4] font-semibold">Order Details</h1>
-        <span className="text-xs text-[#ababab]">{cartData.length} items</span>
+        <span className="text-xs text-muted">{cartData.length} items</span>
       </div>
       <div ref={scrollRef}>
         {cartData.length === 0 ? (
-          <p className="text-[#ababab] text-sm text-center py-10">
+          <p className="text-muted text-sm text-center py-10">
             Your cart is empty. Start adding items!
           </p>
         ) : (
           cartData.map((item) => (
-            <div key={item.id} className="bg-[#1f1f1f] rounded-lg px-3 py-2 mb-2">
+            <div key={item.id} className="bg-base rounded-lg px-3 py-2 mb-2">
               <div className="flex items-center justify-between">
-                <h1 className="text-[#f5f5f5] font-semibold text-sm flex-1 mr-2">
+                <h1 className="text-main font-semibold text-sm flex-1 mr-2">
                   {item.name}
                 </h1>
-                <p className="text-[#f5f5f5] font-bold text-sm">Rs{item.price}</p>
+                <p className="text-main font-bold text-sm">Rs{item.price}</p>
               </div>
               <div className="flex items-center justify-between mt-1">
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => dispatch(decrementItem(item.id))}
-                    className="bg-[#343434] text-[#e85d04] p-1 rounded"
+                    className="bg-elevated text-accent p-1 rounded"
                   >
                     <FaMinus size={8} />
                   </button>
@@ -51,13 +51,13 @@ const CartInfo = () => {
                   </span>
                   <button
                     onClick={() => dispatch(incrementItem(item.id))}
-                    className="bg-[#343434] text-[#02ca3a] p-1 rounded"
+                    className="bg-elevated text-success p-1 rounded"
                   >
                     <FaPlus size={8} />
                   </button>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-[#ababab] text-xs">
+                  <span className="text-muted text-xs">
                     Rs{item.pricePerQuantity} x {item.quantity}
                   </span>
                   <RiDeleteBin2Fill

@@ -5,36 +5,37 @@ import { getAvatarName } from "../../utils/index";
 const OrderList = ({ order }) => {
   const isPending = order.paymentStatus === "Pending";
   return (
-    <div className="flex items-center gap-4 mb-3">
-      <button className="bg-[#e85d04] p-3 text-xl font-bold rounded-lg shrink-0">
+    <div className="flex items-center gap-3 mb-3">
+      <button className="bg-accent text-white p-2.5 sm:p-3 text-lg sm:text-xl font-bold rounded-lg shrink-0">
         {getAvatarName(order.customerDetails.name)}
       </button>
 
       {/* name + items — flexible, truncates */}
       <div className="min-w-0 flex-1">
-        <h1 className="text-[#f5f5f5] text-lg font-semibold tracking-wide truncate">
+        <h1 className="text-main text-base sm:text-lg font-semibold tracking-wide truncate">
           {order.customerDetails.name}
         </h1>
-        <p className="text-[#ababab] text-sm">{order.items.length} Items</p>
+        <p className="text-muted text-xs sm:text-sm whitespace-nowrap">{order.items.length} Items</p>
       </div>
 
-      {/* order type — fixed-width column so it always lines up */}
-      <span className="w-28 shrink-0 text-center text-[#e85d04] font-semibold border border-[#e85d04] rounded-lg py-1 text-sm">
-        {order.table ? (
-          <>Table <FaLongArrowAltRight className="text-[#ababab] inline" /> {order.table.tableNo}</>
-        ) : (
-          order.orderType || "Takeaway"
-        )}
-      </span>
+      {/* order type + payment — size to content, never crush the name */}
+      <div className="flex items-center gap-2 shrink-0">
+        <span className="text-center text-accent font-semibold border border-accent rounded-lg px-2.5 py-1 text-xs sm:text-sm whitespace-nowrap">
+          {order.table ? (
+            <>Table <FaLongArrowAltRight className="text-muted inline" /> {order.table.tableNo}</>
+          ) : (
+            order.orderType || "Takeaway"
+          )}
+        </span>
 
-      {/* payment status — fixed column */}
-      <span
-        className={`w-24 shrink-0 text-center text-xs px-2 py-1 rounded-lg ${
-          isPending ? "text-[#f6b100] bg-[#4a452e]" : "text-green-500 bg-[#2e4a40]"
-        }`}
-      >
-        {order.paymentStatus || "Paid"}
-      </span>
+        <span
+          className={`text-center text-xs px-2.5 py-1 rounded-lg whitespace-nowrap ${
+            isPending ? "text-warn bg-[#4a452e]" : "text-green-500 bg-[#2e4a40]"
+          }`}
+        >
+          {order.paymentStatus || "Paid"}
+        </span>
+      </div>
     </div>
   );
 };

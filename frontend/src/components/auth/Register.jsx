@@ -63,10 +63,10 @@ const Register = ({setIsRegister}) => {
     <div>
       <form onSubmit={handleSubmit}>
         <div>
-          <label className="block text-[#ababab] mb-2 text-sm font-medium">
+          <label className="block text-muted mb-2 text-sm font-medium">
             Employee Name
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex item-center rounded-lg p-5 px-4 bg-base">
             <input
               type="text"
               name="name"
@@ -79,10 +79,10 @@ const Register = ({setIsRegister}) => {
           </div>
         </div>
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-muted mb-2 mt-3 text-sm font-medium">
             Employee Email
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex item-center rounded-lg p-5 px-4 bg-base">
             <input
               type="email"
               name="email"
@@ -95,10 +95,10 @@ const Register = ({setIsRegister}) => {
           </div>
         </div>
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-muted mb-2 mt-3 text-sm font-medium">
             Employee Phone
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex item-center rounded-lg p-5 px-4 bg-base">
             <input
               type="text"
               name="phone"
@@ -115,10 +115,10 @@ const Register = ({setIsRegister}) => {
           </div>
         </div>
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-muted mb-2 mt-3 text-sm font-medium">
             Password
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex item-center rounded-lg p-5 px-4 bg-base">
             <input
               type="password"
               name="password"
@@ -131,7 +131,7 @@ const Register = ({setIsRegister}) => {
           </div>
         </div>
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-muted mb-2 mt-3 text-sm font-medium">
             Choose your role
           </label>
 
@@ -142,7 +142,7 @@ const Register = ({setIsRegister}) => {
                   key={role}
                   type="button"
                   onClick={() => handleRoleSelection(role)}
-                  className={`bg-[#1f1f1f] px-4 py-3 w-full rounded-lg text-[#ababab] ${
+                  className={`bg-base px-4 py-3 w-full rounded-lg text-muted ${
                     formData.role === role ? "bg-indigo-700" : ""
                   }`}
                 >
@@ -156,7 +156,7 @@ const Register = ({setIsRegister}) => {
         <button
           type="submit"
           disabled={registerMutation.isPending}
-          className="w-full rounded-lg mt-6 py-3 text-lg bg-[#e85d04] text-white font-bold disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full rounded-lg mt-6 py-3 text-lg bg-accent text-white font-bold disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {registerMutation.isPending ? "Signing up..." : "Sign up"}
         </button>

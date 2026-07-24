@@ -37,25 +37,25 @@ const Orders = () => {
     : orders;
 
   return (
-    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex flex-col">
+    <div className="bg-base min-h-[calc(100dvh-64px)] flex flex-col">
       <div className="flex flex-wrap items-center justify-between gap-3 px-4 sm:px-10 py-4 shrink-0">
         <div className="flex items-center gap-4">
           <BackButton />
-          <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wider">Orders</h1>
+          <h1 className="text-main text-2xl font-bold tracking-wider">Orders</h1>
         </div>
         <div className="flex flex-wrap items-center gap-3">
-          <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-lg px-4 py-2 w-full sm:w-[280px]">
-            <FaSearch className="text-[#ababab]" />
+          <div className="flex items-center gap-2 bg-panel rounded-lg px-4 py-2 w-full sm:w-[280px]">
+            <FaSearch className="text-muted" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search by Order ID or name"
-              className="bg-transparent outline-none text-[#f5f5f5] text-sm w-full"
+              className="bg-transparent outline-none text-main text-sm w-full"
             />
           </div>
           <button
             onClick={() => navigate("/orders/new")}
-            className="flex items-center gap-2 bg-[#e85d04] text-white font-semibold rounded-lg px-5 py-2"
+            className="flex items-center gap-2 bg-accent text-white font-semibold rounded-lg px-5 py-2"
           >
             <FaPlus /> Create Order
           </button>

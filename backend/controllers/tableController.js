@@ -86,4 +86,35 @@ const updateTable = async (req, res, next) => {
   }
 };
 
-module.exports = { addTable, getTables, updateTable };
+// Superadmin-only: change a table's seat count. Kept separate from updateTable
+// (the booking flow) so ordinary staff can't alter table configuration.
+const updateTableSeats = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { seats } = req.body;
+
+    if (!UUID_RE.test(id)) {
+      return next(createHttpError(404, "Invalid id!"));
+    }
+    if (!isPositiveInt(seats)) {
+      return next(createHttpError(400, "Seats must be a positive whole number."));
+    }
+
+    const { data, error } = await supabase
+      .from("tables")
+      .update({ seats })
+      .eq("id", id)
+      .select(TABLE_SELECT)
+      .single();
+
+    if (error || !data) {
+      return next(createHttpError(404, "Table not found!"));
+    }
+
+    res.status(200).json({ success: true, message: "Seats updated!", data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { addTable, getTables, updateTable, updateTableSeats };

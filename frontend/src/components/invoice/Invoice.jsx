@@ -100,7 +100,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[100] p-4">
-      <div className="bg-white rounded-lg shadow-lg w-[340px] max-h-[90vh] flex flex-col">
+      <div className="bg-white rounded-lg shadow-lg w-full max-w-[340px] max-h-[90vh] flex flex-col">
         <div className="overflow-y-auto flex-1 px-5 py-4 text-gray-900 [font-variant-numeric:tabular-nums]" ref={invoiceRef}>
           {/* Header */}
           <div className="text-center">
@@ -125,10 +125,10 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
           <table className="w-full text-xs mt-2" style={{ borderCollapse: "collapse" }}>
             <thead>
               <tr className="border-y border-dashed border-gray-500">
-                <th className="text-left py-1 w-7 font-normal text-[#555]">Qty</th>
-                <th className="text-left py-1 font-normal text-[#555]">Product Name</th>
-                <th className="text-right py-1 font-normal text-[#555]">Rate</th>
-                <th className="text-right py-1 font-normal text-[#555]">Amount</th>
+                <th className="text-left py-1 w-7 font-normal text-faint">Qty</th>
+                <th className="text-left py-1 font-normal text-faint">Product Name</th>
+                <th className="text-right py-1 font-normal text-faint">Rate</th>
+                <th className="text-right py-1 font-normal text-faint">Amount</th>
               </tr>
             </thead>
             <tbody>
@@ -176,7 +176,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
         </div>
 
         <div className="flex gap-2 p-3 border-t shrink-0">
-          <button onClick={handlePrint} className="bg-[#025cca] text-white px-4 py-2 rounded-lg text-sm font-semibold w-full">
+          <button onClick={handlePrint} className="bg-info text-white px-4 py-2 rounded-lg text-sm font-semibold w-full">
             Print Receipt
           </button>
           <button onClick={() => setShowInvoice(false)} className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-semibold w-full">

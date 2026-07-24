@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { menus } from "../../constants";
-import { getSessionSummary, getSummary, getTables } from "../../https/index";
+import { getOrders, getSessionSummary, getSummary, getTables } from "../../https/index";
 import { formatDateAndTime } from "../../utils/index";
+import { enqueueSnackbar } from "notistack";
 
 const MODES = [
   { key: "session", label: "Current Session" },
@@ -109,59 +110,168 @@ const Metrics = () => {
     { title: "Total Tables", value: `${tablesRes?.data?.data?.length || 0}`, color: "#7f167f" },
   ];
 
-  const exportCsv = () => {
-    if (!stats) return;
+  const [exporting, setExporting] = useState(false);
+
+  const downloadReport = async () => {
+    if (!stats || exporting) return;
     const label = mode === "session" ? "Current Session" : MODES.find((m) => m.key === mode)?.label;
     const fromISO = mode === "session" ? session?.opened_at : range?.from;
     const toISO = mode === "session" ? session?.closes_at : range?.to;
     const fmt = (d) => (d ? new Date(d).toLocaleString() : "—");
-    // CSV-escape any cell containing comma/quote/newline (dates from toLocaleString have commas).
-    const cell = (v) => {
-      const s = String(v ?? "");
-      return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
-    };
-    const rows = [
-      ["Zair Zabar POS — Performance Report"],
-      ["Period", label],
-      ["From", fmt(fromISO)],
-      ["To", fmt(toISO)],
-      ["Generated", new Date().toLocaleString()],
-      [],
-      ["Metric", "Value"],
-      ["Total Revenue (Rs)", stats.totalRevenue],
-      ["Total Orders", stats.totalOrders],
-      ["Paid Payments", stats.paidPayments],
-      ["Pending Payments", stats.pendingPayments],
-      ["Pending Amount (Rs)", stats.pendingAmount],
-      ["Discounts Given (Rs)", stats.discountsGiven],
-      ["Online Payments (Rs)", stats.onlinePayments],
-      ["Cash Payments (Rs)", stats.cashPayments],
-    ];
-    const csv = rows.map((r) => r.map(cell).join(",")).join("\n");
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = `zair-zabar-report-${mode}.csv`;
-    a.click();
-    URL.revokeObjectURL(url);
+    const rs = (n) => `Rs ${Number(n || 0).toLocaleString(undefined, { maximumFractionDigits: 0 })}`;
+    const esc = (v) => String(v ?? "")
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+
+    // Pull every order inside the selected period (same range logic as the cards).
+    let periodOrders = [];
+    try {
+      setExporting(true);
+      const res = await getOrders();
+      const all = res?.data?.data || [];
+      const fromT = fromISO ? new Date(fromISO).getTime() : null;
+      const toT = toISO ? new Date(toISO).getTime() : null;
+      periodOrders = all.filter((o) => {
+        const t = new Date(o.orderDate).getTime();
+        if (fromT != null && t < fromT) return false;
+        if (toT != null && t > toT) return false;
+        return true;
+      });
+    } catch {
+      periodOrders = [];
+    } finally {
+      setExporting(false);
+    }
+    periodOrders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+
+    // Summary cards.
+    const cardsHtml = [
+      ["Total Revenue", rs(stats.totalRevenue), "#e85d04"],
+      ["Total Orders", stats.totalOrders || 0, "#02795a"],
+      ["Paid Payments", stats.paidPayments || 0, "#025cca"],
+      ["Pending Payments", stats.pendingPayments || 0, "#b8860b"],
+      ["Pending Amount", rs(stats.pendingAmount), "#c0392b"],
+      ["Discounts Given", rs(stats.discountsGiven), "#7f167f"],
+      ["Cash Payments", rs(stats.cashPayments), "#4b3f8f"],
+      ["Online Payments", rs(stats.onlinePayments), "#285430"],
+    ].map(([t, v, c]) => `
+      <div class="card">
+        <div class="card-bar" style="background:${c}"></div>
+        <div class="card-t">${t}</div>
+        <div class="card-v">${esc(v)}</div>
+      </div>`).join("");
+
+    // Order rows.
+    const rowsHtml = periodOrders.map((o, i) => {
+      const b = o.bills || {};
+      const items = (o.items || []).map((it) => `${esc(it.name)} ×${it.quantity}`).join(", ");
+      const type = o.orderType || (o.table ? "Dine In" : "Take Away");
+      const where = o.table ? `Table ${o.table.tableNo}` : "Takeaway";
+      const discAmt = o.discountAmount ?? b.discount ?? 0;
+      const status = o.paymentStatus || "Paid";
+      const method = o.paymentMethod && o.paymentMethod !== "Pending" ? o.paymentMethod : "";
+      const pay = status === "Paid" && method ? `Paid · ${method}` : status;
+      const payClass = status === "Pending" ? "pill-pending" : "pill-paid";
+      return `
+        <tr>
+          <td>${i + 1}</td>
+          <td>#${esc(String(o._id).slice(-6))}</td>
+          <td class="nowrap">${esc(fmt(o.orderDate))}</td>
+          <td>${esc(o.customerDetails?.name || "—")}</td>
+          <td>${esc(type)} · ${esc(where)}</td>
+          <td class="items">${items || "—"}</td>
+          <td class="num">${discAmt > 0 ? rs(discAmt) : "—"}</td>
+          <td class="num strong">${rs(b.totalWithTax)}</td>
+          <td><span class="pill ${payClass}">${esc(pay)}</span></td>
+        </tr>`;
+    }).join("");
+
+    const html = `<!doctype html><html><head><meta charset="utf-8">
+      <title>Zair Zabar Report — ${esc(label)}</title>
+      <style>
+        * { box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Arial, sans-serif; color: #1f2937; margin: 0; padding: 28px; }
+        .head { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:3px solid #e85d04; padding-bottom:14px; margin-bottom:18px; }
+        .brand { font-size:22px; font-weight:800; color:#e85d04; letter-spacing:.5px; }
+        .brand span { color:#1f2937; font-weight:600; }
+        .sub { font-size:12px; color:#6b7280; margin-top:2px; }
+        .meta { text-align:right; font-size:12px; color:#374151; line-height:1.6; }
+        .meta b { color:#111827; }
+        h2 { font-size:14px; text-transform:uppercase; letter-spacing:.6px; color:#374151; margin:22px 0 10px; }
+        .cards { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+        .card { border:1px solid #e5e7eb; border-radius:8px; padding:10px 12px; position:relative; overflow:hidden; }
+        .card-bar { position:absolute; left:0; top:0; bottom:0; width:4px; }
+        .card-t { font-size:11px; color:#6b7280; margin-left:6px; }
+        .card-v { font-size:18px; font-weight:700; margin-left:6px; margin-top:2px; }
+        table { width:100%; border-collapse:collapse; font-size:11px; }
+        thead th { background:#1f2937; color:#fff; text-align:left; padding:7px 8px; font-weight:600; }
+        thead th.num { text-align:right; }
+        tbody td { padding:6px 8px; border-bottom:1px solid #eee; vertical-align:top; }
+        tbody tr:nth-child(even) { background:#fafafa; }
+        .num { text-align:right; white-space:nowrap; }
+        .strong { font-weight:700; }
+        .nowrap { white-space:nowrap; }
+        .items { color:#4b5563; max-width:230px; }
+        .pill { display:inline-block; padding:2px 8px; border-radius:10px; font-size:10px; font-weight:600; white-space:nowrap; }
+        .pill-paid { background:#e6f4ea; color:#137333; }
+        .pill-pending { background:#fef3cd; color:#8a6d00; }
+        .empty { text-align:center; color:#9ca3af; padding:24px; }
+        .foot { margin-top:20px; font-size:10px; color:#9ca3af; text-align:center; }
+        @media print { body { padding:0; } thead { display:table-header-group; } tr { break-inside:avoid; } }
+      </style></head><body>
+      <div class="head">
+        <div>
+          <div class="brand">Zair Zabar <span>POS</span></div>
+          <div class="sub">Performance Report</div>
+        </div>
+        <div class="meta">
+          <div>Period: <b>${esc(label)}</b></div>
+          <div>${esc(fmt(fromISO))} &rarr; ${esc(fmt(toISO))}</div>
+          <div>Generated: <b>${esc(new Date().toLocaleString())}</b></div>
+        </div>
+      </div>
+
+      <h2>Summary</h2>
+      <div class="cards">${cardsHtml}</div>
+
+      <h2>Order Details (${periodOrders.length})</h2>
+      <table>
+        <thead><tr>
+          <th>#</th><th>Order</th><th>Date &amp; Time</th><th>Customer</th>
+          <th>Type</th><th>Items</th><th class="num">Discount</th>
+          <th class="num">Total</th><th>Payment</th>
+        </tr></thead>
+        <tbody>${rowsHtml || `<tr><td class="empty" colspan="9">No orders in this period.</td></tr>`}</tbody>
+      </table>
+
+      <div class="foot">Zair Zabar POS · ${esc(label)} · Generated ${esc(new Date().toLocaleString())}</div>
+      <script>window.onload=function(){window.focus();window.print();}</script>
+      </body></html>`;
+
+    const win = window.open("", "_blank");
+    if (!win) {
+      enqueueSnackbar("Allow pop-ups to download the report.", { variant: "warning" });
+      return;
+    }
+    win.document.open();
+    win.document.write(html);
+    win.document.close();
   };
 
   return (
-    <div className="container mx-auto py-2 px-6 md:px-4">
+    <div className="container mx-auto py-2 px-0 md:px-4">
       {/* Session bar — automatic 12 PM – 4 AM business session */}
-      <div className="flex flex-wrap items-center justify-between gap-3 bg-[#1a1a1a] rounded-lg p-4 mb-6">
+      <div className="flex flex-wrap items-center justify-between gap-3 bg-panel rounded-lg p-4 mb-6">
         <div>
-          <p className="text-[#f5f5f5] font-semibold">
+          <p className="text-main font-semibold">
             {session?.active ? "🟢 Session Active" : "🌙 Between Sessions"} · Daily 12:00 PM – 4:00 AM
           </p>
-          <p className="text-[#ababab] text-xs mt-1">
+          <p className="text-muted text-xs mt-1">
             {session
               ? `This session: ${formatDateAndTime(session.opened_at)} → ${formatDateAndTime(session.closes_at)}`
               : "Automatic business session."}
           </p>
         </div>
-        <span className="text-[#ababab] text-xs bg-[#262626] px-3 py-2 rounded-lg">Auto</span>
+        <span className="text-muted text-xs bg-surface px-3 py-2 rounded-lg">Auto</span>
       </div>
 
       {/* Filters */}
@@ -172,7 +282,7 @@ const Metrics = () => {
               key={m.key}
               onClick={() => setMode(m.key)}
               className={`px-4 py-2 rounded-lg text-sm font-semibold ${
-                mode === m.key ? "bg-[#262626] text-white" : "bg-[#1a1a1a] text-[#ababab]"
+                mode === m.key ? "bg-surface text-main" : "bg-panel text-muted"
               }`}
             >
               {m.label}
@@ -181,19 +291,19 @@ const Metrics = () => {
           {mode === "custom" && (
             <>
               <input type="date" value={customFrom} onChange={(e) => setCustomFrom(e.target.value)}
-                className="bg-[#1a1a1a] text-white text-sm rounded-lg px-3 py-2 outline-none" />
+                className="bg-panel text-main text-sm rounded-lg px-3 py-2 outline-none" />
               <input type="date" value={customTo} onChange={(e) => setCustomTo(e.target.value)}
-                className="bg-[#1a1a1a] text-white text-sm rounded-lg px-3 py-2 outline-none" />
+                className="bg-panel text-main text-sm rounded-lg px-3 py-2 outline-none" />
             </>
           )}
         </div>
-        <button onClick={exportCsv} className="bg-[#025cca] text-white px-4 py-2 rounded-lg text-sm font-semibold">
-          Export CSV
+        <button onClick={downloadReport} disabled={exporting} className="bg-info text-white px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-60">
+          {exporting ? "Preparing…" : "Download Report"}
         </button>
       </div>
 
-      <h2 className="font-semibold text-[#f5f5f5] text-xl">Overall Performance</h2>
-      <p className="text-sm text-[#ababab]">
+      <h2 className="font-semibold text-main text-xl">Overall Performance</h2>
+      <p className="text-sm text-muted">
         {mode === "session" ? "Revenue for the current business session." : `Showing: ${MODES.find((m) => m.key === mode)?.label}`}
       </p>
 
@@ -205,21 +315,21 @@ const Metrics = () => {
             className="text-left shadow-sm rounded-lg p-4 hover:opacity-90 cursor-pointer"
             style={{ backgroundColor: c.color }}
           >
-            <p className="font-medium text-xs text-[#f5f5f5]">{c.title}</p>
-            <p className="mt-1 font-semibold text-2xl text-[#f5f5f5]">{c.value}</p>
-            <p className="text-[10px] text-[#f5f5f5] opacity-70 mt-2">Tap for details →</p>
+            <p className="font-medium text-xs text-white">{c.title}</p>
+            <p className="mt-1 font-semibold text-2xl text-white">{c.value}</p>
+            <p className="text-[10px] text-white opacity-70 mt-2">Tap for details →</p>
           </button>
         ))}
       </div>
 
       <div className="mt-12">
-        <h2 className="font-semibold text-[#f5f5f5] text-xl">Item Details</h2>
-        <p className="text-sm text-[#ababab]">Catalog size and live counts.</p>
+        <h2 className="font-semibold text-main text-xl">Item Details</h2>
+        <p className="text-sm text-muted">Catalog size and live counts.</p>
         <div className="mt-6 grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
           {items.map((c, i) => (
             <div key={i} className="shadow-sm rounded-lg p-4" style={{ backgroundColor: c.color }}>
-              <p className="font-medium text-xs text-[#f5f5f5]">{c.title}</p>
-              <p className="mt-1 font-semibold text-2xl text-[#f5f5f5]">{c.value}</p>
+              <p className="font-medium text-xs text-white">{c.title}</p>
+              <p className="mt-1 font-semibold text-2xl text-white">{c.value}</p>
             </div>
           ))}
         </div>

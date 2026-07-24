@@ -48,15 +48,15 @@ const Modal = ({ setIsTableModalOpen }) => {
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.9 }}
         transition={{ duration: 0.3, ease: "easeInOut" }}
-        className="bg-[#262626] p-6 rounded-lg shadow-lg w-96"
+        className="bg-surface p-6 rounded-lg shadow-lg w-96"
       >
         {/* Modal Header */}
 
         <div className="flex justify-between item-center mb-4">
-          <h2 className="text-[#f5f5f5] text-xl font-semibold">Add Table</h2>
+          <h2 className="text-main text-xl font-semibold">Add Table</h2>
           <button
             onClick={handleCloseModal}
-            className="text-[#f5f5f5] hover:text-red-500"
+            className="text-main hover:text-red-500"
           >
             <IoMdClose size={24} />
           </button>
@@ -66,10 +66,10 @@ const Modal = ({ setIsTableModalOpen }) => {
 
         <form onSubmit={handleSubmit} className="space-y-4 mt-10">
           <div>
-            <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+            <label className="block text-muted mb-2 mt-3 text-sm font-medium">
               Table Number
             </label>
-            <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+            <div className="flex item-center rounded-lg p-5 px-4 bg-base">
               <input
                 type="number"
                 name="tableNo"
@@ -81,10 +81,10 @@ const Modal = ({ setIsTableModalOpen }) => {
             </div>
           </div>
           <div>
-            <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+            <label className="block text-muted mb-2 mt-3 text-sm font-medium">
               Number of Seats
             </label>
-            <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+            <div className="flex item-center rounded-lg p-5 px-4 bg-base">
               <input
                 type="number"
                 name="seats"
@@ -98,7 +98,7 @@ const Modal = ({ setIsTableModalOpen }) => {
 
           <button
             type="submit"
-            className="w-full rounded-lg mt-10 mb-6 py-3 text-lg bg-[#e85d04] text-white font-bold"
+            className="w-full rounded-lg mt-10 mb-6 py-3 text-lg bg-accent text-white font-bold"
           >
             Add Table
           </button>

@@ -16,23 +16,23 @@ const Menu = () => {
   const customerData = useSelector((state) => state.customer);
 
   return (
-    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex pb-16">
+    <div className="bg-base min-h-[calc(100dvh-64px)] lg:h-[calc(100vh-64px)] flex flex-col lg:flex-row pb-16">
       {/* Left - Menu Items */}
-      <div className="flex-[3] flex flex-col h-full overflow-hidden">
-        <div className="flex items-center justify-between px-10 py-3 shrink-0">
+      <div className="flex-[3] flex flex-col lg:h-full lg:overflow-hidden">
+        <div className="flex items-center justify-between px-4 sm:px-10 py-3 shrink-0">
           <div className="flex items-center gap-4">
             <BackButton />
-            <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wider">
+            <h1 className="text-main text-2xl font-bold tracking-wider">
               Menu
             </h1>
           </div>
           <div className="flex items-center gap-3 cursor-pointer">
-            <MdRestaurantMenu className="text-[#f5f5f5] text-4xl" />
+            <MdRestaurantMenu className="text-main text-4xl" />
             <div className="flex flex-col items-start">
-              <h1 className="text-md text-[#f5f5f5] font-semibold tracking-wide">
+              <h1 className="text-md text-main font-semibold tracking-wide">
                 {customerData.customerName || "Customer Name"}
               </h1>
-              <p className="text-xs text-[#ababab] font-medium">
+              <p className="text-xs text-muted font-medium">
                 Table : {customerData.table?.tableNo || "N/A"}
               </p>
             </div>
@@ -44,11 +44,11 @@ const Menu = () => {
       </div>
 
       {/* Right - Order Panel */}
-      <div className="w-[350px] bg-[#1a1a1a] flex flex-col border-l border-[#2a2a2a]">
+      <div className="w-full lg:w-[350px] bg-panel flex flex-col border-t lg:border-t-0 lg:border-l border-line">
         {/* Customer Info - fixed top */}
         <div className="shrink-0">
           <CustomerInfo />
-          <hr className="border-[#2a2a2a] border-t-2" />
+          <hr className="border-line border-t-2" />
         </div>
 
         {/* Cart Items - scrollable */}
@@ -57,7 +57,7 @@ const Menu = () => {
         </div>
 
         {/* Bill - fixed bottom */}
-        <div className="shrink-0 border-t border-[#2a2a2a]">
+        <div className="shrink-0 border-t border-line">
           <Bill />
         </div>
       </div>

@@ -26,25 +26,25 @@ const Tables = () => {
   }
 
   return (
-    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex flex-col">
-      <div className="flex items-center justify-between px-10 py-4 shrink-0">
+    <div className="bg-base min-h-[calc(100dvh-64px)] flex flex-col">
+      <div className="flex items-center justify-between px-4 sm:px-10 py-4 shrink-0 gap-3">
         <div className="flex items-center gap-4">
           <BackButton />
-          <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wider">Tables</h1>
+          <h1 className="text-main text-2xl font-bold tracking-wider">Tables</h1>
         </div>
         <div className="flex items-center gap-4">
           <button
             onClick={() => setStatus("all")}
-            className={`text-[#ababab] text-lg rounded-lg px-5 py-2 font-semibold ${
-              status === "all" ? "bg-[#383838]" : ""
+            className={`text-muted text-lg rounded-lg px-5 py-2 font-semibold ${
+              status === "all" ? "bg-elevated" : ""
             }`}
           >
             All
           </button>
           <button
             onClick={() => setStatus("booked")}
-            className={`text-[#ababab] text-lg rounded-lg px-5 py-2 font-semibold ${
-              status === "booked" ? "bg-[#383838]" : ""
+            className={`text-muted text-lg rounded-lg px-5 py-2 font-semibold ${
+              status === "booked" ? "bg-elevated" : ""
             }`}
           >
             Booked

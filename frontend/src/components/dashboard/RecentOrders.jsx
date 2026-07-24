@@ -18,11 +18,11 @@ const RecentOrders = () => {
   const orders = resData?.data?.data || [];
 
   return (
-    <div className="container mx-auto bg-[#262626] p-4 rounded-lg">
-      <h2 className="text-[#f5f5f5] text-xl font-semibold mb-4">Recent Orders</h2>
+    <div className="container mx-auto bg-surface p-4 rounded-lg">
+      <h2 className="text-main text-xl font-semibold mb-4">Recent Orders</h2>
       <div className="overflow-x-auto">
-        <table className="w-full text-left text-[#f5f5f5]">
-          <thead className="bg-[#333] text-[#ababab]">
+        <table className="w-full text-left text-main">
+          <thead className="bg-elevated text-muted">
             <tr>
               <th className="p-3">Order ID</th>
               <th className="p-3">Customer</th>
@@ -36,7 +36,7 @@ const RecentOrders = () => {
           </thead>
           <tbody>
             {orders.map((order) => (
-              <tr key={order._id} className="border-b border-gray-600 hover:bg-[#333]">
+              <tr key={order._id} className="border-b border-gray-600 hover:bg-elevated">
                 <td className="p-4">#{order._id.slice(-6)}</td>
                 <td className="p-4">{order.customerDetails.name}</td>
                 <td className="p-4">{order.orderType || (order.table ? "Dine in" : "Take Away")}</td>
@@ -44,11 +44,11 @@ const RecentOrders = () => {
                   <span
                     className={`px-2 py-1 rounded-lg text-xs ${
                       order.paymentStatus === "Pending"
-                        ? "text-[#f6b100] bg-[#4a452e]"
+                        ? "text-warn bg-[#4a452e]"
                         : "text-green-500 bg-[#2e4a40]"
                     }`}
                   >
-                    {order.paymentStatus || "Paid"} · {order.paymentMethod || "—"}
+                    {order.paymentStatus || "Paid"}
                   </span>
                 </td>
                 <td className="p-4">{formatDateAndTime(order.orderDate)}</td>

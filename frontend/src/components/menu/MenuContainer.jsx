@@ -38,21 +38,21 @@ const MenuContainer = () => {
             onClick={() => setSelected(menu)}
           >
             <div className="flex items-center justify-between w-full">
-              <h1 className="text-[#f5f5f5] text-md font-semibold">
+              <h1 className="text-white text-md font-semibold">
                 {menu.icon} {menu.name}
               </h1>
               {selected.id === menu.id && (
                 <GrRadialSelected className="text-white" size={18} />
               )}
             </div>
-            <p className="text-[#ababab] text-xs font-semibold">
+            <p className="text-white/70 text-xs font-semibold">
               {menu.items.length} Items
             </p>
           </div>
         ))}
       </div>
 
-      <hr className="border-[#2a2a2a] border-t-2 mt-2" />
+      <hr className="border-line border-t-2 mt-2" />
 
       <div className="grid grid-cols-4 gap-4 px-10 py-4 w-[100%]">
         {selected?.items.map((item) => {
@@ -62,28 +62,28 @@ const MenuContainer = () => {
               key={item.id}
               className={`flex flex-col items-start justify-between p-4 rounded-lg h-[120px] cursor-pointer transition-colors ${
                 qty > 0
-                  ? "bg-[#2e4a40] border border-[#02ca3a]"
-                  : "bg-[#1a1a1a] hover:bg-[#2a2a2a]"
+                  ? "bg-[#2e4a40] border border-success"
+                  : "bg-panel hover:bg-line"
               }`}
               onClick={() => handleAddToCart(item)}
             >
               <div className="flex items-start justify-between w-full">
-                <h1 className="text-[#f5f5f5] text-md font-semibold leading-tight">
+                <h1 className="text-main text-md font-semibold leading-tight">
                   {item.name}
                 </h1>
                 {qty > 0 && (
-                  <span className="bg-[#02ca3a] text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
+                  <span className="bg-success text-white text-xs font-bold px-2 py-1 rounded-full min-w-[24px] text-center">
                     {qty}
                   </span>
                 )}
               </div>
               <div className="flex items-center justify-between w-full">
-                <p className="text-[#e85d04] text-lg font-bold">
+                <p className="text-accent text-lg font-bold">
                   Rs{item.price}
                 </p>
                 <div className="flex items-center gap-1">
-                  <FaPlus className="text-[#02ca3a]" size={14} />
-                  <span className="text-[#ababab] text-xs">Tap to add</span>
+                  <FaPlus className="text-success" size={14} />
+                  <span className="text-muted text-xs">Tap to add</span>
                 </div>
               </div>
             </div>

@@ -146,16 +146,16 @@ const Bill = () => {
     <>
       <div className="px-3 py-1">
         <div className="flex items-center justify-between">
-          <p className="text-xs text-[#ababab]">Items({cartData.length})</p>
-          <h1 className="text-[#f5f5f5] text-sm font-bold">Rs{total.toFixed(0)}</h1>
+          <p className="text-xs text-muted">Items({cartData.length})</p>
+          <h1 className="text-main text-sm font-bold">Rs{total.toFixed(0)}</h1>
         </div>
         <div className="flex items-center justify-between mt-1">
-          <p className="text-xs text-[#ababab]">Tax({taxRate}%)</p>
-          <h1 className="text-[#f5f5f5] text-sm font-bold">Rs{tax.toFixed(0)}</h1>
+          <p className="text-xs text-muted">Tax({taxRate}%)</p>
+          <h1 className="text-main text-sm font-bold">Rs{tax.toFixed(0)}</h1>
         </div>
         <div className="flex items-center justify-between mt-1">
-          <p className="text-xs text-[#f5f5f5] font-semibold">Total</p>
-          <h1 className="text-[#e85d04] text-lg font-bold">Rs{totalPriceWithTax.toFixed(0)}</h1>
+          <p className="text-xs text-main font-semibold">Total</p>
+          <h1 className="text-accent text-lg font-bold">Rs{totalPriceWithTax.toFixed(0)}</h1>
         </div>
 
         <div className="flex items-center gap-2 mt-2">
@@ -163,8 +163,8 @@ const Bill = () => {
             onClick={() => setPaymentMethod("Cash")}
             className={`px-2 py-1.5 w-full rounded-lg text-xs font-semibold ${
               paymentMethod === "Cash"
-                ? "bg-[#e85d04] text-white"
-                : "bg-[#1f1f1f] text-[#ababab]"
+                ? "bg-accent text-white"
+                : "bg-base text-muted"
             }`}
           >
             Cash
@@ -173,8 +173,8 @@ const Bill = () => {
             onClick={() => setPaymentMethod("Online")}
             className={`px-2 py-1.5 w-full rounded-lg text-xs font-semibold ${
               paymentMethod === "Online"
-                ? "bg-[#e85d04] text-white"
-                : "bg-[#1f1f1f] text-[#ababab]"
+                ? "bg-accent text-white"
+                : "bg-base text-muted"
             }`}
           >
             Online
@@ -182,12 +182,12 @@ const Bill = () => {
         </div>
 
         <div className="flex items-center gap-2 mt-2 mb-1">
-          <button className="bg-[#025cca] px-3 py-2.5 w-full rounded-lg text-white font-semibold text-sm">
+          <button className="bg-info px-3 py-2.5 w-full rounded-lg text-white font-semibold text-sm">
             Print Receipt
           </button>
           <button
             onClick={handlePlaceOrder}
-            className="bg-[#e85d04] px-3 py-2.5 w-full rounded-lg text-white font-semibold text-sm"
+            className="bg-accent px-3 py-2.5 w-full rounded-lg text-white font-semibold text-sm"
           >
             Place Order
           </button>

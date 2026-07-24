@@ -5,6 +5,7 @@ import { enqueueSnackbar } from "notistack";
 import { useDispatch } from "react-redux";
 import { setUser } from "../../redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from "react-icons/fa";
  
 const Login = () => {
     const navigate = useNavigate();
@@ -13,6 +14,7 @@ const Login = () => {
       email: "",
       password: "",
     });
+    const [showPassword, setShowPassword] = useState(false);
   
     const handleChange = (e) => {
       setFormData({...formData, [e.target.name]: e.target.value});
@@ -45,44 +47,51 @@ const Login = () => {
 
   return (
     <div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-muted mb-1.5 text-sm font-medium">
             Employee Email
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-base border border-line focus-within:border-accent transition-colors">
+            <FaEnvelope className="text-muted shrink-0" />
             <input
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter employee email"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              className="bg-transparent flex-1 min-w-0 text-main placeholder:text-faint focus:outline-none"
               required
             />
           </div>
         </div>
         <div>
-          <label className="block text-[#ababab] mb-2 mt-3 text-sm font-medium">
+          <label className="block text-muted mb-1.5 text-sm font-medium">
             Password
           </label>
-          <div className="flex item-center rounded-lg p-5 px-4 bg-[#1f1f1f]">
+          <div className="flex items-center gap-3 rounded-xl px-4 py-3 bg-base border border-line focus-within:border-accent transition-colors">
+            <FaLock className="text-muted shrink-0" />
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter password"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              className="bg-transparent flex-1 min-w-0 text-main placeholder:text-faint focus:outline-none"
               required
             />
+            <button type="button" onClick={() => setShowPassword((s) => !s)}
+              className="text-muted hover:text-main shrink-0" tabIndex={-1}
+              title={showPassword ? "Hide password" : "Show password"}>
+              {showPassword ? <FaEyeSlash /> : <FaEye />}
+            </button>
           </div>
         </div>
 
         <button
           type="submit"
           disabled={loginMutation.isPending}
-          className="w-full rounded-lg mt-6 py-3 text-lg bg-[#e85d04] text-white font-bold disabled:opacity-60 disabled:cursor-not-allowed"
+          className="w-full rounded-xl mt-2 py-3 text-lg bg-accent hover:brightness-110 text-white font-bold transition disabled:opacity-60 disabled:cursor-not-allowed"
         >
           {loginMutation.isPending ? "Signing in..." : "Sign in"}
         </button>

@@ -5,6 +5,10 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zair Zabar POS</title>
+    <script>
+      // Apply saved theme before first paint to avoid a flash.
+      try { if (localStorage.getItem('zz_theme') === 'light') document.documentElement.classList.add('light'); } catch (e) {}
+    </script>
   </head>
   <body>
     <div id="root"></div>

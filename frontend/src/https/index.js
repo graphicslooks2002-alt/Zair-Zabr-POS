@@ -22,6 +22,8 @@ export const addTable = (data) => axiosWrapper.post("/api/table/", data);
 export const getTables = () => axiosWrapper.get("/api/table");
 export const updateTable = ({ tableId, ...tableData }) =>
   axiosWrapper.put(`/api/table/${tableId}`, tableData);
+export const updateTableSeats = (id, seats) =>
+  axiosWrapper.patch(`/api/table/${id}/seats`, { seats });
 
 // Payment Endpoints
 export const createOrderRazorpay = (data) =>

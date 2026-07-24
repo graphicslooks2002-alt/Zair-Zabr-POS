@@ -24,7 +24,7 @@ const Home = () => {
   const sessionOrders = stats?.totalOrders || 0;
 
   return (
-    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] overflow-y-auto lg:overflow-hidden flex flex-col lg:flex-row">
+    <div className="bg-base min-h-[calc(100dvh-64px)] lg:h-[calc(100vh-64px)] lg:overflow-hidden flex flex-col lg:flex-row">
       <div className="w-full lg:flex-[3] lg:overflow-y-auto scrollbar-hide pb-4 lg:pb-20">
         <Greetings />
         <div className="w-full px-8 mt-8">

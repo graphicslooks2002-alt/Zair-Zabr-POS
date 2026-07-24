@@ -117,21 +117,21 @@ const ManageStaff = () => {
     <div className="container mx-auto py-2 px-6">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h2 className="font-semibold text-[#f5f5f5] text-xl flex items-center gap-2">
-            Manage Staff {isOwner && <span className="inline-flex items-center gap-1 text-xs bg-[#4a3a1a] text-[#f6b100] px-2 py-0.5 rounded-lg"><FaCrown size={10} /> Owner</span>}
+          <h2 className="font-semibold text-main text-xl flex items-center gap-2">
+            Manage Staff {isOwner && <span className="inline-flex items-center gap-1 text-xs bg-[#4a3a1a] text-warn px-2 py-0.5 rounded-lg"><FaCrown size={10} /> Owner</span>}
           </h2>
-          <p className="text-sm text-[#ababab]">
+          <p className="text-sm text-muted">
             {isOwner ? "Full control — add, edit, remove, and suspend any account including admins." : "Add, edit, or remove employee accounts."}
           </p>
         </div>
-        <button onClick={openAdd} className="flex items-center gap-2 bg-[#e85d04] text-white font-semibold rounded-lg px-5 py-2.5">
+        <button onClick={openAdd} className="flex items-center gap-2 bg-accent text-white font-semibold rounded-lg px-5 py-2.5">
           <FaPlus /> Add Staff
         </button>
       </div>
 
-      <div className="bg-[#1a1a1a] rounded-lg overflow-x-auto">
+      <div className="bg-panel rounded-lg overflow-x-auto">
         <table className="w-full text-left text-sm">
-          <thead className="text-[#ababab] border-b border-[#333]">
+          <thead className="text-muted border-b border-elevated">
             <tr>
               <th className="px-4 py-3">Name</th>
               <th className="px-4 py-3">Email</th>
@@ -141,29 +141,29 @@ const ManageStaff = () => {
               <th className="px-4 py-3 text-right">Actions</th>
             </tr>
           </thead>
-          <tbody className="text-[#f5f5f5]">
+          <tbody className="text-main">
             {rows.length === 0 ? (
               <tr><td colSpan={6} className="px-4 py-6 text-center text-gray-500">No staff yet.</td></tr>
             ) : (
               rows.map((u) => (
-                <tr key={u._id} className="border-b border-[#262626]">
+                <tr key={u._id} className="border-b border-surface">
                   <td className="px-4 py-3">{u.name}</td>
                   <td className="px-4 py-3">{u.email}</td>
                   <td className="px-4 py-3">{u.phone}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-lg text-xs inline-flex items-center gap-1 ${
-                      u.role === "Superadmin" ? "bg-[#4a3a1a] text-[#f6b100]" : u.role === "Admin" ? "bg-[#3a2e4a] text-[#c79bff]" : u.role === "Cashier" ? "bg-[#2e3a4a] text-[#9bc7ff]" : "bg-[#2e4a40] text-green-400"
+                      u.role === "Superadmin" ? "bg-[#4a3a1a] text-warn" : u.role === "Admin" ? "bg-[#3a2e4a] text-[#c79bff]" : u.role === "Cashier" ? "bg-[#2e3a4a] text-[#9bc7ff]" : "bg-[#2e4a40] text-green-400"
                     }`}>{u.role === "Superadmin" && <FaCrown size={10} />}{u.role === "Superadmin" ? "Owner" : u.role}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-lg text-xs ${
-                      u.status === "Blocked" ? "bg-[#4a2e2e] text-red-400" : u.status === "Active" ? "bg-[#2e4a40] text-green-400" : u.status === "Pending Approval" ? "bg-[#4a452e] text-[#f6b100]" : "bg-[#3a3a3a] text-[#ababab]"
+                      u.status === "Blocked" ? "bg-[#4a2e2e] text-red-400" : u.status === "Active" ? "bg-[#2e4a40] text-green-400" : u.status === "Pending Approval" ? "bg-[#4a452e] text-warn" : "bg-elevated text-muted"
                     }`}>{u.status || "Active"}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex gap-3 justify-end">
                       {u.status !== "Active" && u.status !== "Blocked" && (
-                        <button onClick={() => resendMutation.mutate(u._id)} disabled={resendMutation.isPending} className="text-[#f6b100]" title="Resend verification email"><FaPaperPlane /></button>
+                        <button onClick={() => resendMutation.mutate(u._id)} disabled={resendMutation.isPending} className="text-warn" title="Resend verification email"><FaPaperPlane /></button>
                       )}
                       {/* Owner-only: suspend/restore access for any role. Can't target self or another owner. */}
                       {isOwner && u._id !== myId && u.role !== "Superadmin" && (
@@ -173,7 +173,7 @@ const ManageStaff = () => {
                           <button onClick={() => { if (window.confirm(`Suspend ${u.name}'s access? They won't be able to log in.`)) blockMutation.mutate({ id: u._id, blocked: true }); }} disabled={blockMutation.isPending} className="text-red-400" title="Suspend access"><FaBan /></button>
                         )
                       )}
-                      <button onClick={() => openEdit(u)} className="text-[#025cca]" title="Edit"><FaEdit /></button>
+                      <button onClick={() => openEdit(u)} className="text-info" title="Edit"><FaEdit /></button>
                       <button onClick={() => { if (window.confirm(`Delete ${u.name}?`)) deleteMutation.mutate(u._id); }} className="text-red-500" title="Delete"><FaTrash /></button>
                     </div>
                   </td>
@@ -186,36 +186,36 @@ const ManageStaff = () => {
 
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4">
-          <div className="bg-[#262626] rounded-lg w-full max-w-md p-6">
+          <div className="bg-surface rounded-lg w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-[#f5f5f5] text-lg font-semibold">{editingId ? "Edit Staff" : "Add Staff"}</h3>
+              <h3 className="text-main text-lg font-semibold">{editingId ? "Edit Staff" : "Add Staff"}</h3>
               <button onClick={closeModal} className="text-gray-400 hover:text-white"><FaTimes /></button>
             </div>
             <form onSubmit={submit} className="space-y-3">
               <input value={form.name} onChange={set("name")} placeholder="Full name" required
-                className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
+                className="w-full bg-base text-main rounded-lg px-3 py-2.5 text-sm outline-none" />
               <input type="email" value={form.email} onChange={set("email")} placeholder="Email"
                 required={!editingId} disabled={!!editingId}
-                className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none disabled:opacity-50" />
+                className="w-full bg-base text-main rounded-lg px-3 py-2.5 text-sm outline-none disabled:opacity-50" />
               <input value={form.phone} onChange={set("phone")} placeholder="Phone (e.g. 03001234567)" required
                 inputMode="numeric" maxLength={11} pattern="0[0-9]{10}" title="11 digits starting with 0"
-                className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 text-sm outline-none" />
+                className="w-full bg-base text-main rounded-lg px-3 py-2.5 text-sm outline-none" />
               <div>
-                <label className="block text-[#ababab] text-xs mb-1">{editingId ? "Reset Password (optional)" : "Set Password"}</label>
+                <label className="block text-muted text-xs mb-1">{editingId ? "Reset Password (optional)" : "Set Password"}</label>
                 <div className="relative">
                   <input type={showPwd ? "text" : "password"} value={form.password} onChange={set("password")}
                     placeholder={editingId ? "New password (leave blank to keep)" : "Set a strong password"}
                     required={!editingId}
-                    className="w-full bg-[#1f1f1f] text-white rounded-lg px-3 py-2.5 pr-10 text-sm outline-none" />
+                    className="w-full bg-base text-main rounded-lg px-3 py-2.5 pr-10 text-sm outline-none" />
                   <button type="button" onClick={() => setShowPwd((s) => !s)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#ababab]">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted">
                     {showPwd ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
                 {(!editingId || form.password) && (
                   <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2">
                     {pwdChecks(form.password).map((c) => (
-                      <span key={c.label} className={`text-[11px] flex items-center gap-1 ${c.ok ? "text-green-400" : "text-[#777]"}`}>
+                      <span key={c.label} className={`text-[11px] flex items-center gap-1 ${c.ok ? "text-green-400" : "text-faint"}`}>
                         <FaCheck size={9} /> {c.label}
                       </span>
                     ))}
@@ -223,18 +223,18 @@ const ManageStaff = () => {
                 )}
               </div>
               <div>
-                <label className="block text-[#ababab] text-xs mb-1">Role</label>
+                <label className="block text-muted text-xs mb-1">Role</label>
                 <div className="flex flex-wrap gap-2">
                   {ROLES.map((r) => (
                     <button type="button" key={r} onClick={() => setForm((f) => ({ ...f, role: r }))}
-                      className={`flex-1 min-w-[80px] py-2 rounded-lg text-sm font-semibold inline-flex items-center justify-center gap-1 ${form.role === r ? "bg-[#e85d04] text-white" : "bg-[#1f1f1f] text-[#ababab]"}`}>
+                      className={`flex-1 min-w-[80px] py-2 rounded-lg text-sm font-semibold inline-flex items-center justify-center gap-1 ${form.role === r ? "bg-accent text-white" : "bg-base text-muted"}`}>
                       {r === "Superadmin" && <FaCrown size={11} />}{r === "Superadmin" ? "Owner" : r}
                     </button>
                   ))}
                 </div>
               </div>
               <button type="submit" disabled={saving}
-                className="w-full bg-[#e85d04] text-white py-3 rounded-lg font-semibold disabled:opacity-50">
+                className="w-full bg-accent text-white py-3 rounded-lg font-semibold disabled:opacity-50">
                 {saving ? "Saving..." : editingId ? "Save Changes" : "Add Staff"}
               </button>
             </form>

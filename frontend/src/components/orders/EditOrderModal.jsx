@@ -117,16 +117,16 @@ const EditOrderModal = ({ order, onClose }) => {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[120] p-4">
-      <div className="bg-[#1f1f1f] rounded-xl w-full max-w-md max-h-[90vh] flex flex-col">
+      <div className="bg-base rounded-xl w-full max-w-md max-h-[90vh] flex flex-col">
         {/* header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-[#2a2a2a] shrink-0">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-line shrink-0">
           <div>
-            <h3 className="text-[#f5f5f5] text-lg font-semibold">Edit Order</h3>
-            <p className="text-[#ababab] text-xs">
+            <h3 className="text-main text-lg font-semibold">Edit Order</h3>
+            <p className="text-muted text-xs">
               #{order._id.slice(-6)} · {order.customerDetails?.name}
             </p>
           </div>
-          <button onClick={onClose} className="text-[#ababab] hover:text-white p-1">
+          <button onClick={onClose} className="text-muted hover:text-white p-1">
             <FaTimes />
           </button>
         </div>
@@ -134,25 +134,25 @@ const EditOrderModal = ({ order, onClose }) => {
         {/* body */}
         <div className="flex-1 overflow-y-auto scrollbar-hide p-4 space-y-3">
           {/* add-item search */}
-          <div className="flex items-center gap-2 bg-[#1a1a1a] rounded-lg px-3 py-2">
-            <FaSearch className="text-[#ababab]" />
+          <div className="flex items-center gap-2 bg-panel rounded-lg px-3 py-2">
+            <FaSearch className="text-muted" />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search a dish to add..."
-              className="bg-transparent outline-none text-[#f5f5f5] text-sm w-full"
+              className="bg-transparent outline-none text-main text-sm w-full"
             />
           </div>
           {matches.length > 0 && (
-            <div className="bg-[#181818] rounded-lg divide-y divide-[#2a2a2a] max-h-44 overflow-y-auto scrollbar-hide">
+            <div className="bg-[#181818] rounded-lg divide-y divide-line max-h-44 overflow-y-auto scrollbar-hide">
               {matches.map((item) => (
                 <button
                   key={`${item.cat}-${item.id}`}
                   onClick={() => addItem(item)}
-                  className="w-full flex items-center justify-between px-3 py-2 hover:bg-[#262626] text-left"
+                  className="w-full flex items-center justify-between px-3 py-2 hover:bg-surface text-left"
                 >
-                  <span className="text-[#f5f5f5] text-sm">{item.name}</span>
-                  <span className="text-[#02ca3a] text-sm">+ Rs{item.price}</span>
+                  <span className="text-main text-sm">{item.name}</span>
+                  <span className="text-success text-sm">+ Rs{item.price}</span>
                 </button>
               ))}
             </div>
@@ -160,8 +160,8 @@ const EditOrderModal = ({ order, onClose }) => {
 
           {/* current items */}
           <div className="flex items-center justify-between pt-1">
-            <span className="text-[#f5f5f5] text-sm font-semibold">Items</span>
-            <span className="text-[#ababab] text-xs">
+            <span className="text-main text-sm font-semibold">Items</span>
+            <span className="text-muted text-xs">
               {totalQty} item{totalQty === 1 ? "" : "s"}
             </span>
           </div>
@@ -170,19 +170,19 @@ const EditOrderModal = ({ order, onClose }) => {
               <p className="text-gray-500 text-sm text-center py-6">No items. Add one above.</p>
             ) : (
               cart.map((i) => (
-                <div key={i.name} className="flex items-center justify-between bg-[#262626] rounded-lg px-3 py-2.5">
+                <div key={i.name} className="flex items-center justify-between bg-surface rounded-lg px-3 py-2.5">
                   <div className="min-w-0 mr-2">
-                    <p className="text-[#f5f5f5] text-sm font-semibold truncate">{i.name}</p>
-                    <p className="text-[#ababab] text-xs mt-0.5">
-                      Rs{i.pricePerQuantity} × {i.quantity} = <span className="text-[#02ca3a]">Rs{i.price}</span>
+                    <p className="text-main text-sm font-semibold truncate">{i.name}</p>
+                    <p className="text-muted text-xs mt-0.5">
+                      Rs{i.pricePerQuantity} × {i.quantity} = <span className="text-success">Rs{i.price}</span>
                     </p>
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
-                    <button onClick={() => changeQty(i.name, -1)} className="bg-[#1a1a1a] text-[#e85d04] w-7 h-7 rounded flex items-center justify-center">
+                    <button onClick={() => changeQty(i.name, -1)} className="bg-panel text-accent w-7 h-7 rounded flex items-center justify-center">
                       <FaMinus size={10} />
                     </button>
                     <span className="text-white text-sm w-6 text-center font-semibold">{i.quantity}</span>
-                    <button onClick={() => changeQty(i.name, 1)} className="bg-[#1a1a1a] text-[#e85d04] w-7 h-7 rounded flex items-center justify-center">
+                    <button onClick={() => changeQty(i.name, 1)} className="bg-panel text-accent w-7 h-7 rounded flex items-center justify-center">
                       <FaPlus size={10} />
                     </button>
                     <button onClick={() => removeItem(i.name)} className="text-red-500 w-7 h-7 flex items-center justify-center ml-0.5">
@@ -199,7 +199,7 @@ const EditOrderModal = ({ order, onClose }) => {
             <select
               value={discountType}
               onChange={(e) => setDiscountType(e.target.value)}
-              className="bg-[#262626] text-white text-sm rounded-lg px-2 py-2 outline-none"
+              className="bg-surface text-main text-sm rounded-lg px-2 py-2 outline-none"
             >
               <option value="percent">%</option>
               <option value="fixed">Rs</option>
@@ -210,30 +210,30 @@ const EditOrderModal = ({ order, onClose }) => {
               value={discountValue}
               onChange={(e) => setDiscountValue(e.target.value)}
               placeholder="Discount"
-              className="flex-1 bg-[#262626] text-white rounded-lg px-3 py-2 text-sm outline-none"
+              className="flex-1 bg-surface text-main rounded-lg px-3 py-2 text-sm outline-none"
             />
           </div>
 
           {/* totals */}
-          <div className="text-sm text-[#ababab] space-y-1 pt-1 border-t border-[#2a2a2a]">
+          <div className="text-sm text-muted space-y-1 pt-1 border-t border-line">
             <div className="flex justify-between pt-2"><span>Subtotal</span><span>Rs{subtotal.toFixed(0)}</span></div>
             <div className="flex justify-between"><span>Discount</span><span>- Rs{discountAmount.toFixed(0)}</span></div>
           </div>
         </div>
 
         {/* footer */}
-        <div className="shrink-0 border-t border-[#2a2a2a] p-3 space-y-2 bg-[#1a1a1a] rounded-b-xl">
-          <div className="flex justify-between items-center text-[#f5f5f5] font-bold text-lg px-1">
+        <div className="shrink-0 border-t border-line p-3 space-y-2 bg-panel rounded-b-xl">
+          <div className="flex justify-between items-center text-main font-bold text-lg px-1">
             <span>Total</span><span>Rs{total.toFixed(0)}</span>
           </div>
           <div className="flex gap-2">
-            <button onClick={onClose} className="flex-1 bg-[#262626] text-[#ababab] py-2.5 rounded-lg text-sm font-semibold">
+            <button onClick={onClose} className="flex-1 bg-surface text-muted py-2.5 rounded-lg text-sm font-semibold">
               Cancel
             </button>
             <button
               onClick={handleSave}
               disabled={saveMutation.isPending}
-              className="flex-1 bg-[#e85d04] text-white py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50"
+              className="flex-1 bg-accent text-white py-2.5 rounded-lg text-sm font-semibold disabled:opacity-50"
             >
               {saveMutation.isPending ? "Saving..." : "Save Changes"}
             </button>

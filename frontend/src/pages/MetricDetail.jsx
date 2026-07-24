@@ -69,8 +69,8 @@ const MetricDetail = () => {
 
   if (!metric) {
     return (
-      <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex items-center justify-center text-gray-400">
-        Unknown metric. <button onClick={() => navigate("/dashboard")} className="text-[#e85d04] ml-2">Back</button>
+      <div className="bg-base min-h-[calc(100dvh-64px)] flex items-center justify-center text-gray-400">
+        Unknown metric. <button onClick={() => navigate("/dashboard")} className="text-accent ml-2">Back</button>
       </div>
     );
   }
@@ -78,26 +78,26 @@ const MetricDetail = () => {
   const fmt = (n) => (metric.money ? `Rs ${Number(n).toFixed(0)}` : `${n}`);
 
   return (
-    <div className="bg-[#1f1f1f] h-[calc(100vh-64px)] flex flex-col">
+    <div className="bg-base min-h-[calc(100dvh-64px)] flex flex-col">
       <div className="flex items-center gap-4 px-8 py-5 shrink-0">
-        <button onClick={() => navigate("/dashboard")} className="bg-[#262626] text-white p-2 rounded-lg">
+        <button onClick={() => navigate("/dashboard")} className="bg-surface text-main p-2 rounded-lg">
           <FaArrowLeft />
         </button>
         <div>
-          <h1 className="text-[#f5f5f5] text-2xl font-bold tracking-wide">{metric.title}</h1>
-          <p className="text-[#ababab] text-sm">{metric.desc} · {rangeLabel}</p>
+          <h1 className="text-main text-2xl font-bold tracking-wide">{metric.title}</h1>
+          <p className="text-muted text-sm">{metric.desc} · {rangeLabel}</p>
         </div>
         <div className="ml-auto text-right">
-          <p className="text-[#ababab] text-xs uppercase">{metric.title}</p>
-          <p className="text-[#f5f5f5] text-3xl font-bold">{fmt(figure)}</p>
-          <p className="text-[#ababab] text-xs">{rows.length} order{rows.length === 1 ? "" : "s"}</p>
+          <p className="text-muted text-xs uppercase">{metric.title}</p>
+          <p className="text-main text-3xl font-bold">{fmt(figure)}</p>
+          <p className="text-muted text-xs">{rows.length} order{rows.length === 1 ? "" : "s"}</p>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide px-8 pb-24">
-        <div className="bg-[#1a1a1a] rounded-lg overflow-x-auto">
+        <div className="bg-panel rounded-lg overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="text-[#ababab] border-b border-[#333]">
+            <thead className="text-muted border-b border-elevated">
               <tr>
                 <th className="px-4 py-3">Order #</th>
                 <th className="px-4 py-3">Customer</th>
@@ -108,21 +108,21 @@ const MetricDetail = () => {
                 <th className="px-4 py-3 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="text-[#f5f5f5]">
+            <tbody className="text-main">
               {rows.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No matching orders.</td></tr>
               ) : (
                 rows.slice(0, 300).map((o) => (
-                  <tr key={o._id} className="border-b border-[#262626]">
+                  <tr key={o._id} className="border-b border-surface">
                     <td className="px-4 py-3">#{o._id.slice(-6)}</td>
                     <td className="px-4 py-3">{o.customerDetails?.name}</td>
                     <td className="px-4 py-3">{o.orderType || (o.table ? "Dine in" : "Take Away")}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-lg text-xs ${o.paymentStatus === "Pending" ? "text-[#f6b100] bg-[#4a452e]" : "text-green-500 bg-[#2e4a40]"}`}>
+                      <span className={`px-2 py-1 rounded-lg text-xs ${o.paymentStatus === "Pending" ? "text-warn bg-[#4a452e]" : "text-green-500 bg-[#2e4a40]"}`}>
                         {o.paymentStatus || "Paid"} · {o.paymentMethod || "—"}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-[#ababab]">{formatDateAndTime(o.orderDate)}</td>
+                    <td className="px-4 py-3 text-muted">{formatDateAndTime(o.orderDate)}</td>
                     <td className="px-4 py-3 text-right">
                       {metric.key === "discounts" || key === "discounts"
                         ? `Rs ${Number(o.discountAmount || 0).toFixed(0)}`
@@ -136,14 +136,14 @@ const MetricDetail = () => {
                           <button
                             onClick={() => settleMutation.mutate(o._id)}
                             disabled={settleMutation.isPending}
-                            className="bg-[#02ca3a] text-white px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50"
+                            className="bg-success text-white px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50"
                           >
                             Mark Paid
                           </button>
                         )}
                         <button
                           onClick={() => setReceipt(o)}
-                          className="bg-[#025cca] text-white px-3 py-1.5 rounded-lg text-xs font-semibold"
+                          className="bg-info text-white px-3 py-1.5 rounded-lg text-xs font-semibold"
                         >
                           Receipt
                         </button>

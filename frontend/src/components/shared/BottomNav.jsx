@@ -13,28 +13,28 @@ const BottomNav = () => {
 
   const isActive = (path) => location.pathname === path;
   const cls = (path) =>
-    `flex items-center justify-center font-bold ${
-      isActive(path) ? "text-[#f5f5f5] bg-[#343434]" : "text-[#ababab]"
-    } w-[300px] rounded-[20px]`;
+    `flex flex-col items-center justify-center gap-0.5 flex-1 min-w-0 max-w-[110px] py-1 rounded-xl text-[11px] sm:text-xs font-semibold transition-colors ${
+      isActive(path) ? "text-accent bg-accent/10" : "text-muted hover:text-main"
+    }`;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-[#262626] p-2 h-16 flex justify-around z-40">
+    <div className="fixed bottom-0 left-0 right-0 bg-surface border-t border-line p-1.5 h-16 flex justify-around items-stretch gap-1 z-40 shadow-[0_-2px_10px_rgba(0,0,0,0.15)]">
       {/* Home (statistics) — Admin only */}
       {isAdmin && (
         <button onClick={() => navigate("/")} className={cls("/")}>
-          <FaHome className="inline mr-2" size={20} /> <p>Home</p>
+          <FaHome size={19} /> <span>Home</span>
         </button>
       )}
       <button onClick={() => navigate("/orders")} className={cls("/orders")}>
-        <MdOutlineReorder className="inline mr-2" size={20} /> <p>Orders</p>
+        <MdOutlineReorder size={20} /> <span>Orders</span>
       </button>
       <button onClick={() => navigate("/tables")} className={cls("/tables")}>
-        <MdTableBar className="inline mr-2" size={20} /> <p>Tables</p>
+        <MdTableBar size={20} /> <span>Tables</span>
       </button>
       {/* Dashboard / More (statistics) — Admin only */}
       {isAdmin && (
         <button onClick={() => navigate("/dashboard")} className={cls("/dashboard")}>
-          <CiCircleMore className="inline mr-2" size={20} /> <p>More</p>
+          <CiCircleMore size={22} /> <span>More</span>
         </button>
       )}
     </div>
