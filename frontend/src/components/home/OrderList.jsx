@@ -6,7 +6,7 @@ const OrderList = ({ order }) => {
   const isPending = order.paymentStatus === "Pending";
   return (
     <div className="flex items-center gap-3 mb-3">
-      <button className="bg-accent text-white p-2.5 sm:p-3 text-lg sm:text-xl font-bold rounded-lg shrink-0">
+      <button className="bg-accent text-white w-11 h-11 sm:w-12 sm:h-12 flex items-center justify-center text-base sm:text-lg font-bold rounded-lg shrink-0">
         {getAvatarName(order.customerDetails.name)}
       </button>
 
@@ -18,18 +18,18 @@ const OrderList = ({ order }) => {
         <p className="text-muted text-xs sm:text-sm whitespace-nowrap">{order.items.length} Items</p>
       </div>
 
-      {/* order type + payment — size to content, never crush the name */}
+      {/* order type + payment — fixed-width columns so they align across rows */}
       <div className="flex items-center gap-2 shrink-0">
-        <span className="text-center text-accent font-semibold border border-accent rounded-lg px-2.5 py-1 text-xs sm:text-sm whitespace-nowrap">
+        <span className="w-24 inline-flex items-center justify-center text-accent font-semibold border border-accent rounded-lg py-1 text-xs sm:text-sm whitespace-nowrap">
           {order.table ? (
-            <>Table <FaLongArrowAltRight className="text-muted inline" /> {order.table.tableNo}</>
+            <>Table <FaLongArrowAltRight className="text-muted inline mx-1" /> {order.table.tableNo}</>
           ) : (
             order.orderType || "Takeaway"
           )}
         </span>
 
         <span
-          className={`text-center text-xs px-2.5 py-1 rounded-lg whitespace-nowrap ${
+          className={`w-20 inline-flex items-center justify-center text-xs py-1 rounded-lg whitespace-nowrap ${
             isPending ? "text-warn bg-[#4a452e]" : "text-green-500 bg-[#2e4a40]"
           }`}
         >
