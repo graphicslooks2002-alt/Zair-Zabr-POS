@@ -24,8 +24,18 @@ export const getBgColor = (seed) => {
 export const getAvatarName = (name) => {
   if(!name) return "";
 
-  return name.split(" ").map(word => word[0]).join("").toUpperCase();
+  // At most 2 initials, preferring words that start with a letter
+  // (so "ST 5 03029634921 WAQAR" -> "SW", not "S50W").
+  const initials = name
+    .trim()
+    .split(/\s+/)
+    .filter((w) => /[a-zA-Z]/.test(w[0] || ""))
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
+  return initials || name.trim().slice(0, 2).toUpperCase();
 }
 
 export const formatDate = (date) => {
