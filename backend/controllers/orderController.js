@@ -102,14 +102,24 @@ const getOrderById = async (req, res, next) => {
 
 const getOrders = async (req, res, next) => {
   try {
-    const { data, error } = await supabase
-      .from("orders")
-      .select(ORDER_SELECT)
-      .order("created_at", { ascending: false });
+    // PostgREST caps a response at 1000 rows; page through with .range()
+    // so the client receives every order (not a silent 1000-row slice).
+    const PAGE = 1000;
+    let all = [];
+    let offset = 0;
+    for (;;) {
+      const { data, error } = await supabase
+        .from("orders")
+        .select(ORDER_SELECT)
+        .order("created_at", { ascending: false })
+        .range(offset, offset + PAGE - 1);
+      if (error) return next(createHttpError(500, error.message));
+      all = all.concat(data || []);
+      if (!data || data.length < PAGE) break;
+      offset += PAGE;
+    }
 
-    if (error) return next(createHttpError(500, error.message));
-
-    res.status(200).json({ data });
+    res.status(200).json({ data: all });
   } catch (error) {
     next(error);
   }
@@ -202,10 +212,10 @@ const settleOrder = async (req, res, next) => {
       return next(createHttpError(404, "Order not found!"));
     }
 
-    // Settle matching pending payment rows.
+    // Once paid, remove it from the pending ledger entirely.
     await supabase
       .from("pending_payments")
-      .update({ payment_status: "Paid", updated_at: new Date().toISOString() })
+      .delete()
       .eq("order_id", id);
 
     // Free the linked table, if any.

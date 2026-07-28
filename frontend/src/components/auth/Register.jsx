@@ -73,7 +73,7 @@ const Register = ({setIsRegister}) => {
               value={formData.name}
               onChange={handleChange}
               placeholder="Enter employee name"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              className="bg-transparent flex-1 text-main focus:outline-none"
               required
             />
           </div>
@@ -89,7 +89,7 @@ const Register = ({setIsRegister}) => {
               value={formData.email}
               onChange={handleChange}
               placeholder="Enter employee email"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              className="bg-transparent flex-1 text-main focus:outline-none"
               required
             />
           </div>
@@ -109,7 +109,7 @@ const Register = ({setIsRegister}) => {
               maxLength={11}
               pattern="0[0-9]{10}"
               title="11 digits starting with 0"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              className="bg-transparent flex-1 text-main focus:outline-none"
               required
             />
           </div>
@@ -125,7 +125,7 @@ const Register = ({setIsRegister}) => {
               value={formData.password}
               onChange={handleChange}
               placeholder="Enter password"
-              className="bg-transparent flex-1 text-white focus:outline-none"
+              className="bg-transparent flex-1 text-main focus:outline-none"
               required
             />
           </div>

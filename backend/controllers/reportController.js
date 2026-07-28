@@ -53,15 +53,27 @@ const computeStats = (orders) => {
   return stats;
 };
 
+// PostgREST caps a single response at 1000 rows, which silently truncated
+// wide ranges (giving wrong totals). Page through with .range() to get ALL rows.
 const fetchOrdersBetween = async (fromISO, toISO) => {
-  let query = supabase
-    .from("orders")
-    .select("bills, payment_status, payment_method, discount_amount, order_date");
-  if (fromISO) query = query.gte("order_date", fromISO);
-  if (toISO) query = query.lte("order_date", toISO);
-  const { data, error } = await query;
-  if (error) throw createHttpError(500, error.message);
-  return data || [];
+  const PAGE = 1000;
+  let all = [];
+  let offset = 0;
+  for (;;) {
+    let query = supabase
+      .from("orders")
+      .select("bills, payment_status, payment_method, discount_amount, order_date")
+      .order("order_date", { ascending: false })
+      .range(offset, offset + PAGE - 1);
+    if (fromISO) query = query.gte("order_date", fromISO);
+    if (toISO) query = query.lte("order_date", toISO);
+    const { data, error } = await query;
+    if (error) throw createHttpError(500, error.message);
+    all = all.concat(data || []);
+    if (!data || data.length < PAGE) break;
+    offset += PAGE;
+  }
+  return all;
 };
 
 // GET /api/report/summary?from=ISO&to=ISO  (defaults: all-time if omitted)

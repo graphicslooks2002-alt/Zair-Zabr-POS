@@ -6,6 +6,7 @@
 
 /* ---------- Theme tokens ---------- */
 :root {                 /* Dark (default) */
+  color-scheme: dark;   /* native controls (date picker, scrollbars) match theme */
   --c-base: #1f1f1f;
   --c-surface: #262626;
   --c-panel: #1a1a1a;

@@ -46,7 +46,7 @@ const CartInfo = () => {
                   >
                     <FaMinus size={8} />
                   </button>
-                  <span className="text-white text-xs font-bold min-w-[16px] text-center">
+                  <span className="text-main text-xs font-bold min-w-[16px] text-center">
                     {item.quantity}
                   </span>
                   <button

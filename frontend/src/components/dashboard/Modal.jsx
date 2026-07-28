@@ -75,7 +75,7 @@ const Modal = ({ setIsTableModalOpen }) => {
                 name="tableNo"
                 value={tableData.tableNo}
                 onChange={handleInputChange}
-                className="bg-transparent flex-1 text-white focus:outline-none"
+                className="bg-transparent flex-1 text-main focus:outline-none"
                 required
               />
             </div>
@@ -90,7 +90,7 @@ const Modal = ({ setIsTableModalOpen }) => {
                 name="seats"
                 value={tableData.seats}
                 onChange={handleInputChange}
-                className="bg-transparent flex-1 text-white focus:outline-none"
+                className="bg-transparent flex-1 text-main focus:outline-none"
                 required
               />
             </div>

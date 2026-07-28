@@ -118,7 +118,7 @@ const ManageStaff = () => {
       <div className="flex items-center justify-between mb-4">
         <div>
           <h2 className="font-semibold text-main text-xl flex items-center gap-2">
-            Manage Staff {isOwner && <span className="inline-flex items-center gap-1 text-xs bg-[#4a3a1a] text-warn px-2 py-0.5 rounded-lg"><FaCrown size={10} /> Owner</span>}
+            Manage Staff {isOwner && <span className="inline-flex items-center gap-1 text-xs bg-warn/15 text-warn px-2 py-0.5 rounded-lg"><FaCrown size={10} /> Owner</span>}
           </h2>
           <p className="text-sm text-muted">
             {isOwner ? "Full control — add, edit, remove, and suspend any account including admins." : "Add, edit, or remove employee accounts."}
@@ -152,12 +152,12 @@ const ManageStaff = () => {
                   <td className="px-4 py-3">{u.phone}</td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-lg text-xs inline-flex items-center gap-1 ${
-                      u.role === "Superadmin" ? "bg-[#4a3a1a] text-warn" : u.role === "Admin" ? "bg-[#3a2e4a] text-[#c79bff]" : u.role === "Cashier" ? "bg-[#2e3a4a] text-[#9bc7ff]" : "bg-[#2e4a40] text-green-400"
+                      u.role === "Superadmin" ? "bg-warn/15 text-warn" : u.role === "Admin" ? "bg-[#3a2e4a] text-[#c79bff]" : u.role === "Cashier" ? "bg-[#2e3a4a] text-[#9bc7ff]" : "bg-success/15 text-green-400"
                     }`}>{u.role === "Superadmin" && <FaCrown size={10} />}{u.role === "Superadmin" ? "Owner" : u.role}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-lg text-xs ${
-                      u.status === "Blocked" ? "bg-[#4a2e2e] text-red-400" : u.status === "Active" ? "bg-[#2e4a40] text-green-400" : u.status === "Pending Approval" ? "bg-[#4a452e] text-warn" : "bg-elevated text-muted"
+                      u.status === "Blocked" ? "bg-[#4a2e2e] text-red-400" : u.status === "Active" ? "bg-success/15 text-green-400" : u.status === "Pending Approval" ? "bg-warn/15 text-warn" : "bg-elevated text-muted"
                     }`}>{u.status || "Active"}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
@@ -189,7 +189,7 @@ const ManageStaff = () => {
           <div className="bg-surface rounded-lg w-full max-w-md p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-main text-lg font-semibold">{editingId ? "Edit Staff" : "Add Staff"}</h3>
-              <button onClick={closeModal} className="text-gray-400 hover:text-white"><FaTimes /></button>
+              <button onClick={closeModal} className="text-gray-400 hover:text-main"><FaTimes /></button>
             </div>
             <form onSubmit={submit} className="space-y-3">
               <input value={form.name} onChange={set("name")} placeholder="Full name" required

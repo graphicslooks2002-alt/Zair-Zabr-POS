@@ -126,7 +126,7 @@ const EditOrderModal = ({ order, onClose }) => {
               #{order._id.slice(-6)} · {order.customerDetails?.name}
             </p>
           </div>
-          <button onClick={onClose} className="text-muted hover:text-white p-1">
+          <button onClick={onClose} className="text-muted hover:text-main p-1">
             <FaTimes />
           </button>
         </div>
@@ -181,7 +181,7 @@ const EditOrderModal = ({ order, onClose }) => {
                     <button onClick={() => changeQty(i.name, -1)} className="bg-panel text-accent w-7 h-7 rounded flex items-center justify-center">
                       <FaMinus size={10} />
                     </button>
-                    <span className="text-white text-sm w-6 text-center font-semibold">{i.quantity}</span>
+                    <span className="text-main text-sm w-6 text-center font-semibold">{i.quantity}</span>
                     <button onClick={() => changeQty(i.name, 1)} className="bg-panel text-accent w-7 h-7 rounded flex items-center justify-center">
                       <FaPlus size={10} />
                     </button>

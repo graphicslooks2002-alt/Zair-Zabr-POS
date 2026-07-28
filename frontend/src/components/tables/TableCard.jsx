@@ -59,7 +59,7 @@ const TableCard = ({id, name, status, initials, seats}) => {
           <FaLongArrowAltRight className="text-muted shrink-0" />
           <span>{name}</span>
         </h1>
-        <p className={`${status === "Booked" ? "text-warn bg-[#664a04]" : "text-green-600 bg-[#2e4a40]"} px-2 py-1 rounded-lg text-xs shrink-0 whitespace-nowrap`}>
+        <p className={`${status === "Booked" ? "text-warn bg-warn/15" : "text-green-600 bg-success/15"} px-2 py-1 rounded-lg text-xs shrink-0 whitespace-nowrap`}>
           {status}
         </p>
       </div>

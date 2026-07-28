@@ -30,7 +30,7 @@ const OrderList = ({ order }) => {
 
         <span
           className={`w-20 inline-flex items-center justify-center text-xs py-1 rounded-lg whitespace-nowrap ${
-            isPending ? "text-warn bg-[#4a452e]" : "text-green-500 bg-[#2e4a40]"
+            isPending ? "text-warn bg-warn/15" : "text-green-500 bg-success/15"
           }`}
         >
           {order.paymentStatus || "Paid"}

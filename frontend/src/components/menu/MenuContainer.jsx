@@ -62,7 +62,7 @@ const MenuContainer = () => {
               key={item.id}
               className={`flex flex-col items-start justify-between p-4 rounded-lg h-[120px] cursor-pointer transition-colors ${
                 qty > 0
-                  ? "bg-[#2e4a40] border border-success"
+                  ? "bg-success/15 border border-success"
                   : "bg-panel hover:bg-line"
               }`}
               onClick={() => handleAddToCart(item)}

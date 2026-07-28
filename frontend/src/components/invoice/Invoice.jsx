@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { formatDateAndTime } from "../../utils/index";
+import { formatDateAndTime, paymentLabel } from "../../utils/index";
 
 const URDU_NOTES = [
   "کاؤنٹر چھوڑنے کے بعد کوئی شکایت قابل قبول نہ ہوگی۔",
@@ -48,7 +48,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
       <div class="row"><span>Total Items: ${items.length}</span><span>Gross: ${Number(bills.total || 0).toFixed(0)}</span></div>
       ${bills.discount > 0 ? `<div class="row"><span></span><span>Discount: ${Number(bills.discount).toFixed(0)}</span></div>` : ""}
       <div class="totalbar"><span>Total Bill</span><span>Rs ${Number(bills.totalWithTax || 0).toFixed(0)}</span></div>
-      <div class="row pay"><span>Payment: ${orderInfo.paymentMethod || "—"}${orderInfo.paymentStatus ? " · " + orderInfo.paymentStatus : ""}</span></div>
+      <div class="row pay"><span>Payment: ${paymentLabel(orderInfo.paymentStatus, orderInfo.paymentMethod)}</span></div>
       ${orderInfo.notes ? `<div class="row"><span>Notes: ${orderInfo.notes}</span></div>` : ""}
       <div class="divider"></div>
       <div class="urdu-block">${urdu}</div>
@@ -110,7 +110,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             <p className="text-[10px]">Timing: 12:00 PM - 4:00 AM</p>
           </div>
 
-          <div className="border-t border-dashed border-gray-500 my-2" />
+          <div className="border-t border-dashed border-gray-400 my-2" />
 
           <div className="flex justify-between text-xs">
             <span>Bill #: {orderInfo._id ? orderInfo._id.slice(-6).toUpperCase() : "—"}</span>
@@ -124,7 +124,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
           {/* Items table */}
           <table className="w-full text-xs mt-2" style={{ borderCollapse: "collapse" }}>
             <thead>
-              <tr className="border-y border-dashed border-gray-500">
+              <tr className="border-y border-dashed border-gray-400">
                 <th className="text-left py-1 w-7 font-normal text-faint">Qty</th>
                 <th className="text-left py-1 font-normal text-faint">Product Name</th>
                 <th className="text-right py-1 font-normal text-faint">Rate</th>
@@ -143,7 +143,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             </tbody>
           </table>
 
-          <div className="border-t border-dashed border-gray-500 my-2" />
+          <div className="border-t border-dashed border-gray-400 my-2" />
 
           <div className="flex justify-between text-xs">
             <span>Total Items: {items.length}</span>
@@ -161,10 +161,10 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             <span>Rs {Number(bills.totalWithTax || 0).toFixed(0)}</span>
           </div>
 
-          <div className="text-xs">Payment: {orderInfo.paymentMethod || "—"}{orderInfo.paymentStatus ? ` · ${orderInfo.paymentStatus}` : ""}</div>
+          <div className="text-xs">Payment: {paymentLabel(orderInfo.paymentStatus, orderInfo.paymentMethod)}</div>
           {orderInfo.notes && <div className="text-xs mt-0.5">Notes: {orderInfo.notes}</div>}
 
-          <div className="border-t border-dashed border-gray-500 my-2" />
+          <div className="border-t border-dashed border-gray-400 my-2" />
 
           {/* Urdu footer */}
           <div dir="rtl" className="space-y-1.5">

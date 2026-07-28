@@ -38,6 +38,15 @@ export const getAvatarName = (name) => {
   return initials || name.trim().slice(0, 2).toUpperCase();
 }
 
+// Payment label for order lists. Appends the method ONLY when it's a real
+// payment method (Cash/Online) on a Paid order — so bad/legacy values like
+// "Pending" or empty never render as "Paid · Pending" / "Paid · —".
+export const paymentLabel = (status, method) => {
+  const s = status || "Paid";
+  const valid = method === "Cash" || method === "Online";
+  return s === "Paid" && valid ? `${s} · ${method}` : s;
+};
+
 export const formatDate = (date) => {
   const months = [
     'January', 'February', 'March', 'April', 'May', 'June',

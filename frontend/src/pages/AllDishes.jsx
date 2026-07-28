@@ -45,9 +45,12 @@ const AllDishes = () => {
       return { from: d.getTime(), to: null };
     }
     if (period === "custom") {
+      // Anchor both bounds to PKT (UTC+5) so a picked date covers that full
+      // Pakistan day — incl. the late-night session (business runs to 4 AM) —
+      // regardless of the viewer's browser timezone.
       return {
-        from: customFrom ? new Date(customFrom).getTime() : null,
-        to: customTo ? new Date(customTo + "T23:59:59").getTime() : null,
+        from: customFrom ? new Date(customFrom + "T00:00:00+05:00").getTime() : null,
+        to: customTo ? new Date(customTo + "T23:59:59.999+05:00").getTime() : null,
       };
     }
     return { from: null, to: null };
@@ -193,7 +196,7 @@ const AllDishes = () => {
                     <td className="px-2 sm:px-4 py-2.5 text-muted">{r.category}</td>
                     <td className="px-2 sm:px-4 py-2.5 text-right">Rs{r.price}</td>
                     <td className="px-2 sm:px-4 py-2.5 text-right">
-                      <span className={`px-2 py-1 rounded-lg text-xs ${r.count > 0 ? "bg-[#2e4a40] text-green-400" : "bg-elevated text-faint"}`}>
+                      <span className={`px-2 py-1 rounded-lg text-xs ${r.count > 0 ? "bg-success/15 text-green-400" : "bg-elevated text-faint"}`}>
                         {r.count}
                       </span>
                     </td>

@@ -1,14 +1,18 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import OrderList from "./OrderList";
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
 import { getOrders } from "../../https/index";
+import Pagination from "../shared/Pagination";
+
+const PER_PAGE = 5;
 
 const RecentOrders = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const { data: resData, isError } = useQuery({
     queryKey: ["orders"],
@@ -26,6 +30,10 @@ const RecentOrders = () => {
   const filteredOrders = orders.filter((order) =>
     order.customerDetails?.name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  useEffect(() => { setPage(1); }, [search]);
+  const totalPages = Math.ceil(filteredOrders.length / PER_PAGE);
+  const pageItems = filteredOrders.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (
     <div className="px-8 mt-6">
@@ -54,15 +62,16 @@ const RecentOrders = () => {
         </div>
 
         {/* Order list */}
-        <div className="mt-4 px-6 overflow-y-scroll h-[300px] scrollbar-hide">
-          {filteredOrders.length > 0 ? (
-            filteredOrders.map((order) => {
+        <div className="mt-4 px-6 overflow-y-auto h-[250px] scrollbar-hide">
+          {pageItems.length > 0 ? (
+            pageItems.map((order) => {
               return <OrderList key={order._id} order={order} />;
             })
           ) : (
             <p className="col-span-3 text-gray-500">No orders available</p>
           )}
         </div>
+        <Pagination page={page} totalPages={totalPages} onChange={setPage} className="mt-2" />
       </div>
     </div>
   );

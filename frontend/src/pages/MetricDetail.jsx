@@ -4,9 +4,12 @@ import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tansta
 import { enqueueSnackbar } from "notistack";
 import { FaArrowLeft } from "react-icons/fa";
 import { getOrders, settleOrder } from "../https/index";
-import { formatDateAndTime } from "../utils/index";
+import { formatDateAndTime, paymentLabel } from "../utils/index";
 import Invoice from "../components/invoice/Invoice";
 import BottomNav from "../components/shared/BottomNav";
+import Pagination from "../components/shared/Pagination";
+
+const PER_PAGE = 15;
 
 // Each metric: how to filter the orders + which number it represents.
 const METRICS = {
@@ -31,6 +34,10 @@ const MetricDetail = () => {
 
   const metric = METRICS[key];
   const [receipt, setReceipt] = useState(null);
+  const [page, setPage] = useState(1);
+
+  // Reset to page 1 when the metric or date range changes.
+  useEffect(() => { setPage(1); }, [key, from, to]);
 
   useEffect(() => {
     document.title = `Zair Zabar POS | ${metric?.title || "Detail"}`;
@@ -66,6 +73,9 @@ const MetricDetail = () => {
     const figure = metric ? rows.reduce((s, o) => s + metric.value(o), 0) : 0;
     return { rows, figure };
   }, [resData, metric, from, to]);
+
+  const totalPages = Math.ceil(rows.length / PER_PAGE);
+  const pageItems = rows.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   if (!metric) {
     return (
@@ -112,14 +122,14 @@ const MetricDetail = () => {
               {rows.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No matching orders.</td></tr>
               ) : (
-                rows.slice(0, 300).map((o) => (
+                pageItems.map((o) => (
                   <tr key={o._id} className="border-b border-surface">
                     <td className="px-4 py-3">#{o._id.slice(-6)}</td>
                     <td className="px-4 py-3">{o.customerDetails?.name}</td>
                     <td className="px-4 py-3">{o.orderType || (o.table ? "Dine in" : "Take Away")}</td>
                     <td className="px-4 py-3">
-                      <span className={`px-2 py-1 rounded-lg text-xs ${o.paymentStatus === "Pending" ? "text-warn bg-[#4a452e]" : "text-green-500 bg-[#2e4a40]"}`}>
-                        {o.paymentStatus || "Paid"} · {o.paymentMethod || "—"}
+                      <span className={`px-2 py-1 rounded-lg text-xs ${o.paymentStatus === "Pending" ? "text-warn bg-warn/15" : "text-green-500 bg-success/15"}`}>
+                        {paymentLabel(o.paymentStatus, o.paymentMethod)}
                       </span>
                     </td>
                     <td className="px-4 py-3 text-muted">{formatDateAndTime(o.orderDate)}</td>
@@ -152,12 +162,10 @@ const MetricDetail = () => {
                   </tr>
                 ))
               )}
-              {rows.length > 300 && (
-                <tr><td colSpan={7} className="px-4 py-3 text-center text-gray-500 text-xs">Showing first 300 of {rows.length}. Narrow the range to see fewer.</td></tr>
-              )}
             </tbody>
           </table>
         </div>
+        <Pagination page={page} totalPages={totalPages} onChange={setPage} className="mt-4" />
       </div>
 
       {receipt && <Invoice orderInfo={receipt} setShowInvoice={() => setReceipt(null)} />}

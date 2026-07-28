@@ -7,14 +7,21 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { getOrders } from "../https/index";
 import { enqueueSnackbar } from "notistack";
 import { FaPlus, FaSearch } from "react-icons/fa";
+import Pagination from "../components/shared/Pagination";
+
+const PER_PAGE = 8;
 
 const Orders = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   useEffect(() => {
     document.title = "Zair Zabar POS | Orders";
   }, []);
+
+  // Reset to the first page whenever the search filter changes.
+  useEffect(() => { setPage(1); }, [search]);
 
   const { data: resData, isError } = useQuery({
     queryKey: ["orders"],
@@ -35,6 +42,9 @@ const Orders = () => {
           o.customerDetails?.name?.toLowerCase().includes(q)
       )
     : orders;
+
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (
     <div className="bg-base min-h-[calc(100dvh-64px)] flex flex-col">
@@ -64,12 +74,13 @@ const Orders = () => {
 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-20">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 sm:px-10 py-4">
-          {filtered.length > 0 ? (
-            filtered.map((order) => <OrderCard key={order._id} order={order} />)
+          {pageItems.length > 0 ? (
+            pageItems.map((order) => <OrderCard key={order._id} order={order} />)
           ) : (
             <p className="col-span-2 text-gray-500">No orders found</p>
           )}
         </div>
+        <Pagination page={page} totalPages={totalPages} onChange={setPage} className="pb-6 px-4" />
       </div>
 
       <BottomNav />

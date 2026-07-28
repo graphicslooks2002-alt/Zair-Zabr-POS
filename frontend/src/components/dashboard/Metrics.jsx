@@ -43,9 +43,12 @@ const Metrics = () => {
       return { from: d.toISOString(), to: end };
     }
     if (mode === "custom") {
+      // Anchor both bounds to PKT (UTC+5) so a picked date covers that full
+      // Pakistan day — incl. the late-night session (business runs to 4 AM) —
+      // regardless of the viewer's browser timezone.
       return {
-        from: customFrom ? new Date(customFrom).toISOString() : undefined,
-        to: customTo ? new Date(customTo + "T23:59:59").toISOString() : undefined,
+        from: customFrom ? new Date(customFrom + "T00:00:00+05:00").toISOString() : undefined,
+        to: customTo ? new Date(customTo + "T23:59:59.999+05:00").toISOString() : undefined,
       };
     }
     return null;

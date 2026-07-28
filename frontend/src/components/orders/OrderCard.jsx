@@ -49,12 +49,14 @@ const OrderCard = ({ order }) => {
           <div className="flex flex-col items-end gap-2">
             <p
               className={`px-2 py-1 rounded-lg text-sm ${
-                isPending ? "text-warn bg-[#4a452e]" : "text-green-500 bg-[#2e4a40]"
+                isPending ? "text-warn bg-warn/15" : "text-green-500 bg-success/15"
               }`}
             >
               {order.paymentStatus || "Paid"}
             </p>
-            <p className="text-muted text-xs">{order.paymentMethod || "—"}</p>
+            {(order.paymentMethod === "Cash" || order.paymentMethod === "Online") && (
+              <p className="text-muted text-xs">{order.paymentMethod}</p>
+            )}
           </div>
         </div>
       </div>
@@ -63,7 +65,7 @@ const OrderCard = ({ order }) => {
         <p>{formatDateAndTime(order.orderDate)}</p>
         <p>{order.items.length} Items</p>
       </div>
-      <hr className="w-full mt-3 border-t-1 border-gray-500" />
+      <hr className="w-full mt-3 border-t-1 border-line" />
       <div className="flex items-center justify-between mt-3">
         <h1 className="text-main text-lg font-semibold">Total</h1>
         <p className="text-main text-lg font-semibold">Rs{order.bills.totalWithTax.toFixed(2)}</p>

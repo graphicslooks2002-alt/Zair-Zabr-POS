@@ -280,7 +280,7 @@ const CreateOrder = () => {
               className="w-full bg-surface text-main rounded-lg px-3 py-2.5 text-sm outline-none"
             />
             {presetTable ? (
-              <div className="flex items-center justify-between bg-[#2e4a40] text-green-400 rounded-lg px-3 py-2.5 text-sm font-semibold">
+              <div className="flex items-center justify-between bg-success/15 text-green-400 rounded-lg px-3 py-2.5 text-sm font-semibold">
                 <span className="flex items-center gap-2"><FaChair /> Dine In · Table {presetTable.tableNo}</span>
                 <button onClick={() => navigate("/tables")} className="text-muted text-xs underline">change</button>
               </div>
@@ -323,7 +323,7 @@ const CreateOrder = () => {
                   </div>
                   <div className="flex items-center gap-1.5 shrink-0">
                     <button onClick={() => changeQty(i.name, -1)} className="bg-panel text-accent w-7 h-7 rounded flex items-center justify-center"><FaMinus size={10} /></button>
-                    <span className="text-white text-sm w-6 text-center font-semibold">{i.quantity}</span>
+                    <span className="text-main text-sm w-6 text-center font-semibold">{i.quantity}</span>
                     <button onClick={() => changeQty(i.name, 1)} className="bg-panel text-accent w-7 h-7 rounded flex items-center justify-center"><FaPlus size={10} /></button>
                     <button onClick={() => removeItem(i.name)} className="text-red-500 w-7 h-7 flex items-center justify-center ml-0.5"><FaTrash size={12} /></button>
                   </div>

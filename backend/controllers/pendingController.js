@@ -44,15 +44,6 @@ const settlePending = async (req, res, next) => {
       return next(createHttpError(404, "Pending payment not found!"));
     }
 
-    const { data, error } = await supabase
-      .from("pending_payments")
-      .update({ payment_status: "Paid", updated_at: new Date().toISOString() })
-      .eq("id", id)
-      .select(PENDING_SELECT)
-      .single();
-
-    if (error) return next(createHttpError(500, error.message));
-
     if (pending.order_id) {
       await supabase
         .from("orders")
@@ -74,7 +65,15 @@ const settlePending = async (req, res, next) => {
       }
     }
 
-    res.status(200).json({ success: true, message: "Payment settled!", data });
+    // Once paid, remove it from the pending ledger entirely.
+    const { error } = await supabase
+      .from("pending_payments")
+      .delete()
+      .eq("id", id);
+
+    if (error) return next(createHttpError(500, error.message));
+
+    res.status(200).json({ success: true, message: "Payment settled!", data: { _id: id, orderId: pending.order_id } });
   } catch (error) {
     next(error);
   }
