@@ -7,7 +7,7 @@ import { enqueueSnackbar } from "notistack";
 import { getOrders } from "../../https/index";
 import Pagination from "../shared/Pagination";
 
-const PER_PAGE = 5;
+const PER_PAGE = 50;
 
 const RecentOrders = () => {
   const navigate = useNavigate();

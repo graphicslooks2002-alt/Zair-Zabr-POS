@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import BottomNav from "../components/shared/BottomNav";
 import OrderCard from "../components/orders/OrderCard";
 import BackButton from "../components/shared/BackButton";
@@ -9,16 +9,20 @@ import { enqueueSnackbar } from "notistack";
 import { FaPlus, FaSearch } from "react-icons/fa";
 import Pagination from "../components/shared/Pagination";
 
-const PER_PAGE = 8;
+const PER_PAGE = 50;
 
 const Orders = () => {
   const navigate = useNavigate();
-  const [search, setSearch] = useState("");
+  const [params] = useSearchParams();
+  const [search, setSearch] = useState(params.get("q") || "");
   const [page, setPage] = useState(1);
 
   useEffect(() => {
     document.title = "Zair Zabar POS | Orders";
   }, []);
+
+  // Sync the search box when arriving via the header search (?q=...).
+  useEffect(() => { setSearch(params.get("q") || ""); }, [params]);
 
   // Reset to the first page whenever the search filter changes.
   useEffect(() => { setPage(1); }, [search]);

@@ -5,7 +5,7 @@ import { getOrders } from "../../https/index";
 import { formatDateAndTime } from "../../utils";
 import Pagination from "../shared/Pagination";
 
-const PER_PAGE = 10;
+const PER_PAGE = 50;
 
 const RecentOrders = () => {
   const [page, setPage] = useState(1);

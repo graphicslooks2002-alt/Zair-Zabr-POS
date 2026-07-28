@@ -17,6 +17,13 @@ const Header = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
   const { theme, toggle } = useTheme();
+  const [query, setQuery] = React.useState("");
+
+  // Global search → jump to the Orders page filtered by the query.
+  const submitSearch = (e) => {
+    e.preventDefault();
+    navigate(`/orders?q=${encodeURIComponent(query.trim())}`);
+  };
 
   const logoutMutation = useMutation({
     mutationFn: () => logout(),
@@ -36,24 +43,28 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-30 flex justify-between items-center gap-2 py-3 px-3 sm:px-6 bg-surface border-b border-line shadow-sm">
-      {/* LOGO */}
+      {/* LOGO — on a fixed dark chip so the light logo stays visible in both themes */}
       <div onClick={() => navigate(userData.role === "Admin" || userData.role === "Superadmin" ? "/" : "/orders")} className="flex items-center gap-2 cursor-pointer shrink-0">
-        <img src={logo} className="h-9 w-9 rounded-lg" alt="Zair Zabar logo" />
+        <span className="bg-[#1f1f1f] rounded-lg p-1 flex items-center justify-center shrink-0">
+          <img src={logo} className="h-8 w-8" alt="Zair Zabar logo" />
+        </span>
         <div className="leading-tight">
           <h1 className="text-lg font-extrabold text-accent tracking-wide">Zair Zabar</h1>
           <p className="hidden sm:block text-[10px] text-faint font-medium -mt-0.5 tracking-wider uppercase">Point of Sale</p>
         </div>
       </div>
 
-      {/* SEARCH — placeholder; hidden on small screens */}
-      <div className="hidden md:flex items-center gap-3 bg-base border border-line rounded-xl px-4 py-2 flex-1 max-w-[460px] mx-2 focus-within:border-accent transition-colors">
-        <FaSearch className="text-muted shrink-0" />
+      {/* SEARCH — jumps to Orders filtered by the query; hidden on small screens */}
+      <form onSubmit={submitSearch} className="hidden md:flex items-center gap-3 bg-base border border-line rounded-xl px-4 py-2 flex-1 max-w-[460px] mx-2 focus-within:border-accent transition-colors">
+        <button type="submit" className="text-muted hover:text-accent shrink-0" aria-label="Search"><FaSearch /></button>
         <input
           type="text"
-          placeholder="Search"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+          placeholder="Search orders by ID or customer…"
           className="bg-transparent outline-none text-main placeholder:text-faint w-full text-sm"
         />
-      </div>
+      </form>
 
       {/* ACTIONS */}
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">

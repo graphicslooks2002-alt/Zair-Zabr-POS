@@ -9,7 +9,7 @@ import Invoice from "../components/invoice/Invoice";
 import BottomNav from "../components/shared/BottomNav";
 import Pagination from "../components/shared/Pagination";
 
-const PER_PAGE = 15;
+const PER_PAGE = 50;
 
 // Each metric: how to filter the orders + which number it represents.
 const METRICS = {
