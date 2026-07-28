@@ -2,7 +2,7 @@ import React, { useMemo, useState, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { enqueueSnackbar } from "notistack";
-import { FaArrowLeft } from "react-icons/fa";
+import { FaArrowLeft, FaSearch } from "react-icons/fa";
 import { getOrders, settleOrder } from "../https/index";
 import { formatDateAndTime, paymentLabel } from "../utils/index";
 import Invoice from "../components/invoice/Invoice";
@@ -35,9 +35,10 @@ const MetricDetail = () => {
   const metric = METRICS[key];
   const [receipt, setReceipt] = useState(null);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
 
-  // Reset to page 1 when the metric or date range changes.
-  useEffect(() => { setPage(1); }, [key, from, to]);
+  // Reset to page 1 when the metric, date range, or search changes.
+  useEffect(() => { setPage(1); }, [key, from, to, search]);
 
   useEffect(() => {
     document.title = `Zair Zabar POS | ${metric?.title || "Detail"}`;
@@ -74,8 +75,16 @@ const MetricDetail = () => {
     return { rows, figure };
   }, [resData, metric, from, to]);
 
-  const totalPages = Math.ceil(rows.length / PER_PAGE);
-  const pageItems = rows.slice((page - 1) * PER_PAGE, page * PER_PAGE);
+  const q = search.trim().toLowerCase();
+  const filtered = q
+    ? rows.filter(
+        (o) =>
+          o._id?.toLowerCase().includes(q) ||
+          o.customerDetails?.name?.toLowerCase().includes(q)
+      )
+    : rows;
+  const totalPages = Math.ceil(filtered.length / PER_PAGE);
+  const pageItems = filtered.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   if (!metric) {
     return (
@@ -105,6 +114,15 @@ const MetricDetail = () => {
       </div>
 
       <div className="flex-1 overflow-y-auto scrollbar-hide px-8 pb-24">
+        <div className="flex items-center gap-2 bg-panel border border-line rounded-lg px-4 py-2 mb-4 max-w-sm focus-within:border-accent transition-colors">
+          <FaSearch className="text-muted shrink-0" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by Order ID or customer"
+            className="bg-transparent outline-none text-main placeholder:text-faint text-sm w-full"
+          />
+        </div>
         <div className="bg-panel rounded-lg overflow-x-auto">
           <table className="w-full text-left text-sm">
             <thead className="text-muted border-b border-elevated">
@@ -119,7 +137,7 @@ const MetricDetail = () => {
               </tr>
             </thead>
             <tbody className="text-main">
-              {rows.length === 0 ? (
+              {filtered.length === 0 ? (
                 <tr><td colSpan={7} className="px-4 py-8 text-center text-gray-500">No matching orders.</td></tr>
               ) : (
                 pageItems.map((o) => (

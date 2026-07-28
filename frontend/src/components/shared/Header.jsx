@@ -1,5 +1,5 @@
 import React from "react";
-import { FaSearch, FaUserCircle, FaBell, FaMoon, FaSun } from "react-icons/fa";
+import { FaUserCircle, FaBell, FaMoon, FaSun } from "react-icons/fa";
 import logo from "../../assets/images/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { IoLogOut } from "react-icons/io5";
@@ -17,13 +17,6 @@ const Header = () => {
   const [showLogoutConfirm, setShowLogoutConfirm] = React.useState(false);
 
   const { theme, toggle } = useTheme();
-  const [query, setQuery] = React.useState("");
-
-  // Global search → jump to the Orders page filtered by the query.
-  const submitSearch = (e) => {
-    e.preventDefault();
-    navigate(`/orders?q=${encodeURIComponent(query.trim())}`);
-  };
 
   const logoutMutation = useMutation({
     mutationFn: () => logout(),
@@ -54,17 +47,6 @@ const Header = () => {
         </div>
       </div>
 
-      {/* SEARCH — jumps to Orders filtered by the query; hidden on small screens */}
-      <form onSubmit={submitSearch} className="hidden md:flex items-center gap-3 bg-base border border-line rounded-xl px-4 py-2 flex-1 max-w-[460px] mx-2 focus-within:border-accent transition-colors">
-        <button type="submit" className="text-muted hover:text-accent shrink-0" aria-label="Search"><FaSearch /></button>
-        <input
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search orders by ID or customer…"
-          className="bg-transparent outline-none text-main placeholder:text-faint w-full text-sm"
-        />
-      </form>
 
       {/* ACTIONS */}
       <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
