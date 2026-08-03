@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { MdTableBar, MdCategory } from "react-icons/md";
 import { BiSolidDish } from "react-icons/bi";
 import Metrics from "../components/dashboard/Metrics";
+import SalesChart from "../components/dashboard/SalesChart";
 import RecentOrders from "../components/dashboard/RecentOrders";
 import PendingPayments from "../components/dashboard/PendingPayments";
 import ManageStaff from "../components/dashboard/ManageStaff";
@@ -17,7 +18,7 @@ const buttons = [
   { label: "Add Item", icon: <BiSolidDish />, action: "item" },
 ];
 
-const tabs = ["Metrics", "Orders", "Payments", "Staff", "Menu"];
+const tabs = ["Metrics", "Sales", "Orders", "Payments", "Staff", "Menu"];
 
 const Dashboard = () => {
   useEffect(() => {
@@ -69,6 +70,7 @@ const Dashboard = () => {
 
       <div className="flex-1 overflow-y-auto scrollbar-hide pb-20 px-3 sm:px-6">
         {activeTab === "Metrics" && <Metrics />}
+        {activeTab === "Sales" && <SalesChart />}
         {activeTab === "Orders" && <RecentOrders />}
         {activeTab === "Payments" && <PendingPayments />}
         {activeTab === "Staff" && <ManageStaff />}
