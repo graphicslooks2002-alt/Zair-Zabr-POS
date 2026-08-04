@@ -232,4 +232,43 @@ const settleOrder = async (req, res, next) => {
   }
 };
 
-module.exports = { addOrder, getOrderById, getOrders, updateOrder, settleOrder };
+// Delete an order (Admin/Superadmin). Frees its table and removes any pending
+// ledger row (pending_payments cascades on the FK, but we free the table explicitly).
+const deleteOrder = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!UUID_RE.test(id)) {
+      return next(createHttpError(404, "Invalid id!"));
+    }
+
+    const { data: order } = await supabase
+      .from("orders")
+      .select("table_id")
+      .eq("id", id)
+      .maybeSingle();
+
+    if (!order) {
+      return next(createHttpError(404, "Order not found!"));
+    }
+
+    // Free the table currently holding this order, if any.
+    if (order.table_id) {
+      await supabase
+        .from("tables")
+        .update({ status: "Available", current_order_id: null })
+        .eq("id", order.table_id);
+    }
+
+    // Remove any pending ledger row for this order.
+    await supabase.from("pending_payments").delete().eq("order_id", id);
+
+    const { error } = await supabase.from("orders").delete().eq("id", id);
+    if (error) return next(createHttpError(500, error.message));
+
+    res.status(200).json({ success: true, message: "Order deleted!" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { addOrder, getOrderById, getOrders, updateOrder, settleOrder, deleteOrder };

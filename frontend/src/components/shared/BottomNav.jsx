@@ -1,6 +1,6 @@
 import React from "react";
 import { FaHome } from "react-icons/fa";
-import { MdOutlineReorder, MdTableBar } from "react-icons/md";
+import { MdOutlineReorder, MdTableBar, MdTune } from "react-icons/md";
 import { CiCircleMore } from "react-icons/ci";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
@@ -31,6 +31,12 @@ const BottomNav = () => {
       <button onClick={() => navigate("/tables")} className={cls("/tables")}>
         <MdTableBar size={20} /> <span>Tables</span>
       </button>
+      {/* Manage POS — Admin / Superadmin only */}
+      {isAdmin && (
+        <button onClick={() => navigate("/manage")} className={cls("/manage")}>
+          <MdTune size={20} /> <span>Manage POS</span>
+        </button>
+      )}
       {/* Dashboard / More (statistics) — Admin only */}
       {isAdmin && (
         <button onClick={() => navigate("/dashboard")} className={cls("/dashboard")}>

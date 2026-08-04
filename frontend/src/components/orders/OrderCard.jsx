@@ -1,16 +1,20 @@
 import React, { useState } from "react";
-import { FaLongArrowAltRight, FaEdit } from "react-icons/fa";
+import { FaLongArrowAltRight, FaEdit, FaTrash } from "react-icons/fa";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
 import { enqueueSnackbar } from "notistack";
 import { formatDateAndTime, getAvatarName } from "../../utils/index";
-import { settleOrder } from "../../https/index";
+import { settleOrder, deleteOrder } from "../../https/index";
 import Invoice from "../invoice/Invoice";
 import EditOrderModal from "./EditOrderModal";
 
 const OrderCard = ({ order }) => {
   const queryClient = useQueryClient();
+  const { role } = useSelector((state) => state.user);
+  const canDelete = role === "Admin" || role === "Superadmin";
   const [showInvoice, setShowInvoice] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
 
   const isPending = order.paymentStatus === "Pending";
 
@@ -24,6 +28,19 @@ const OrderCard = ({ order }) => {
       enqueueSnackbar("Payment settled!", { variant: "success" });
     },
     onError: () => enqueueSnackbar("Could not mark the payment as paid. Please try again.", { variant: "error" }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deleteOrder(order._id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["orders"] });
+      queryClient.invalidateQueries({ queryKey: ["pending"] });
+      queryClient.invalidateQueries({ queryKey: ["tables"] });
+      queryClient.invalidateQueries({ queryKey: ["sessionSummary"] });
+      enqueueSnackbar("Order deleted.", { variant: "success" });
+      setConfirmDelete(false);
+    },
+    onError: (err) => enqueueSnackbar(err?.response?.data?.message || "Could not delete the order.", { variant: "error" }),
   });
 
   return (
@@ -93,10 +110,42 @@ const OrderCard = ({ order }) => {
         >
           Receipt
         </button>
+        {canDelete && (
+          <button
+            onClick={() => setConfirmDelete(true)}
+            title="Delete order"
+            className="shrink-0 bg-danger/15 text-danger hover:bg-danger hover:text-white transition-colors px-3 py-2 rounded-lg"
+          >
+            <FaTrash size={13} />
+          </button>
+        )}
       </div>
 
       {showInvoice && <Invoice orderInfo={order} setShowInvoice={setShowInvoice} />}
       {showEdit && <EditOrderModal order={order} onClose={() => setShowEdit(false)} />}
+
+      {confirmDelete && (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[100] p-4" onClick={() => setConfirmDelete(false)}>
+          <div className="bg-surface border border-line rounded-lg w-full max-w-sm p-6 text-center" onClick={(e) => e.stopPropagation()}>
+            <h3 className="text-main text-lg font-semibold mb-2">Delete this order?</h3>
+            <p className="text-muted text-sm mb-6">
+              Order #{order._id.slice(-6)} · Rs{order.bills.totalWithTax.toFixed(0)}. This permanently removes it and adjusts reports. This can't be undone.
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDelete(false)} className="flex-1 bg-panel text-main py-2.5 rounded-lg font-semibold border border-line">
+                Cancel
+              </button>
+              <button
+                onClick={() => deleteMutation.mutate()}
+                disabled={deleteMutation.isPending}
+                className="flex-1 bg-danger text-white py-2.5 rounded-lg font-semibold disabled:opacity-50"
+              >
+                {deleteMutation.isPending ? "Deleting..." : "Delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

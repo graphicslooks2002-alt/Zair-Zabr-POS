@@ -5,7 +5,7 @@ import {
   useLocation,
   Navigate,
 } from "react-router-dom";
-import { Home, Auth, Orders, Tables, Menu, Dashboard, CreateOrder, MetricDetail, ResetPassword, AllDishes } from "./pages";
+import { Home, Auth, Orders, Tables, Menu, Dashboard, CreateOrder, MetricDetail, ResetPassword, AllDishes, Manage } from "./pages";
 import Header from "./components/shared/Header";
 import { useSelector } from "react-redux";
 import useLoadData from "./hooks/useLoadData";
@@ -86,6 +86,14 @@ function Layout() {
           element={
             <AdminRoute>
               <AllDishes />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="/manage"
+          element={
+            <AdminRoute>
+              <Manage />
             </AdminRoute>
           }
         />
