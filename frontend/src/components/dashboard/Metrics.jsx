@@ -8,7 +8,7 @@ import { enqueueSnackbar } from "notistack";
 
 const MODES = [
   { key: "session", label: "Current Session" },
-  { key: "daily", label: "Daily" },
+  { key: "daily", label: "Yesterday" },
   { key: "weekly", label: "Weekly" },
   { key: "monthly", label: "Monthly" },
   { key: "custom", label: "Custom" },
@@ -28,9 +28,12 @@ const Metrics = () => {
   const range = useMemo(() => {
     const end = new Date().toISOString();
     if (mode === "daily") {
-      const d = new Date();
-      d.setHours(0, 0, 0, 0);
-      return { from: d.toISOString(), to: end };
+      // Yesterday: from yesterday 00:00 to today 00:00.
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const yStart = new Date(todayStart);
+      yStart.setDate(yStart.getDate() - 1);
+      return { from: yStart.toISOString(), to: todayStart.toISOString() };
     }
     if (mode === "weekly") {
       const d = new Date();
