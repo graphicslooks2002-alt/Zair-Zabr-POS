@@ -11,7 +11,7 @@ import EditOrderModal from "./EditOrderModal";
 const OrderCard = ({ order }) => {
   const queryClient = useQueryClient();
   const { role } = useSelector((state) => state.user);
-  const canDelete = role === "Admin" || role === "Superadmin";
+  const canDelete = role === "Superadmin";
   const [showInvoice, setShowInvoice] = useState(false);
   const [showEdit, setShowEdit] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);

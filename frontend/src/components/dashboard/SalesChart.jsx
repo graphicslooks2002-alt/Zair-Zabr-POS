@@ -40,7 +40,7 @@ const SalesChart = () => {
   const [reportMonth, setReportMonth] = useState(() => pktToday().slice(0, 7)); // YYYY-MM
   const { theme } = useTheme();
 
-  const { data: resData } = useQuery({
+  const { data: resData, isLoading } = useQuery({
     queryKey: ["orders"],
     queryFn: async () => getOrders(),
     placeholderData: keepPreviousData,
@@ -78,6 +78,9 @@ const SalesChart = () => {
     { cash: 0, online: 0, pending: 0 }
   );
   const collected = totals.cash + totals.online;
+  const bestDay = data.reduce((best, d) => (d.cash + d.online > ((best?.cash + best?.online) || -1) ? d : best), null);
+  const avgCollected = data.length ? Math.round(collected / data.length) : 0;
+  const hasData = collected + totals.pending > 0;
 
   // Theme-aware, recessive axis/grid; validated categorical colors per mode.
   const axis = theme === "light" ? "#52514e" : "#c3c2b7";
@@ -177,17 +180,21 @@ const SalesChart = () => {
   const CustomTooltip = ({ active, payload, label }) => {
     if (!active || !payload?.length) return null;
     return (
-      <div style={{ background: surface, border: `1px solid ${grid}`, borderRadius: 8, padding: "8px 10px", minWidth: 130 }}>
-        <div style={{ color: axis, fontSize: 11, marginBottom: 4 }}>{label}</div>
+      <div style={{ background: surface, border: `1px solid ${grid}`, borderRadius: 10, padding: "10px 12px", minWidth: 160, boxShadow: "0 6px 24px rgba(0,0,0,.18)" }}>
+        <div style={{ color: axis, fontSize: 11, marginBottom: 6, fontWeight: 600 }}>{label}</div>
         {payload.map((p) => (
-          <div key={p.dataKey} style={{ display: "flex", justifyContent: "space-between", gap: 12, fontSize: 12 }}>
+          <div key={p.dataKey} style={{ display: "flex", justifyContent: "space-between", gap: 14, fontSize: 12, marginBottom: 2 }}>
             <span style={{ color: axis }}>
-              <span style={{ display: "inline-block", width: 8, height: 8, borderRadius: 2, background: p.color, marginRight: 6 }} />
+              <span style={{ display: "inline-block", width: 9, height: 9, borderRadius: 3, background: p.color, marginRight: 7 }} />
               {p.name}
             </span>
             <span style={{ color: axis, fontWeight: 600 }}>Rs {p.value.toLocaleString()}</span>
           </div>
         ))}
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 14, fontSize: 12, marginTop: 6, paddingTop: 6, borderTop: `1px solid ${grid}` }}>
+          <span style={{ color: axis, fontWeight: 700 }}>Total</span>
+          <span style={{ color: axis, fontWeight: 700 }}>Rs {payload.reduce((s, p) => s + (p.value || 0), 0).toLocaleString()}</span>
+        </div>
       </div>
     );
   };
@@ -201,13 +208,14 @@ const SalesChart = () => {
             Last {days} days · Collected Rs {collected.toLocaleString()} · Pending Rs {totals.pending.toLocaleString()}
           </p>
         </div>
-        <div className="flex items-center gap-1.5">
+        {/* Segmented range control */}
+        <div className="inline-flex bg-panel border border-line rounded-xl p-1">
           {RANGES.map((r) => (
             <button
               key={r.key}
               onClick={() => setDays(r.key)}
-              className={`px-3 py-1.5 rounded-lg text-sm font-semibold border border-line transition-colors ${
-                days === r.key ? "bg-accent text-white border-accent" : "bg-panel text-muted hover:bg-hover"
+              className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-colors ${
+                days === r.key ? "bg-accent text-white shadow-sm" : "text-muted hover:text-main"
               }`}
             >
               {r.label}
@@ -216,22 +224,45 @@ const SalesChart = () => {
         </div>
       </div>
 
-      <div style={{ width: "100%", height: 340 }}>
-        <ResponsiveContainer>
-          <LineChart data={data} margin={{ top: 10, right: 8, left: 0, bottom: 0 }}>
-            <CartesianGrid vertical={false} stroke={grid} strokeDasharray="3 3" />
-            <XAxis dataKey="label" stroke={axis} fontSize={11} tickLine={false} axisLine={{ stroke: grid }} minTickGap={16} />
-            <YAxis stroke={axis} fontSize={11} tickLine={false} axisLine={false} width={56}
-              tickFormatter={(v) => `Rs${v >= 1000 ? (v / 1000).toFixed(0) + "k" : v}`} />
-            <Tooltip content={<CustomTooltip />} cursor={{ stroke: axis, strokeDasharray: "3 3" }} />
-            <Legend wrapperStyle={{ fontSize: 12, color: axis }} iconType="plainline" />
-            {SERIES.map((s) => (
-              <Line key={s.key} type="monotone" dataKey={s.key} name={s.name}
-                stroke={color(s)} strokeWidth={2} dot={false} activeDot={{ r: 4, fill: color(s) }} />
-            ))}
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {isLoading ? (
+        <div className="h-[300px] flex items-center justify-center text-muted text-sm">Loading sales…</div>
+      ) : !hasData ? (
+        <div className="h-[300px] flex flex-col items-center justify-center text-center">
+          <p className="text-main font-semibold">No sales in the last {days} days</p>
+          <p className="text-muted text-sm mt-1">Once orders come in, the trend shows here.</p>
+        </div>
+      ) : (
+        <>
+          <div style={{ width: "100%", height: 320 }}>
+            <ResponsiveContainer>
+              <LineChart data={data} margin={{ top: 10, right: 16, left: 8, bottom: 8 }}>
+                <CartesianGrid vertical={false} stroke={grid} strokeDasharray="3 3" />
+                <XAxis dataKey="label" stroke={axis} fontSize={11} tickLine={false} axisLine={{ stroke: grid }}
+                  minTickGap={20} tickMargin={10} padding={{ left: 16, right: 16 }} />
+                <YAxis stroke={axis} fontSize={11} tickLine={false} axisLine={false} width={56} tickMargin={8}
+                  tickFormatter={(v) => `${v >= 1000 ? (v / 1000).toFixed(0) + "k" : v}`} />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: axis, strokeDasharray: "3 3" }} />
+                <Legend wrapperStyle={{ fontSize: 12, color: axis }} iconType="plainline" />
+                {SERIES.map((s) => (
+                  <Line key={s.key} type="monotone" dataKey={s.key} name={s.name}
+                    stroke={color(s)} strokeWidth={2.5} dot={false}
+                    activeDot={{ r: 4, fill: color(s), stroke: surface, strokeWidth: 2 }} />
+                ))}
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Context footer */}
+          <div className="flex flex-wrap items-center gap-x-6 gap-y-1 mt-3 text-xs text-muted">
+            <span>Collected: <span className="text-main font-semibold">Rs {collected.toLocaleString()}</span></span>
+            <span>Pending: <span className="text-main font-semibold">Rs {totals.pending.toLocaleString()}</span></span>
+            <span>Daily avg: <span className="text-main font-semibold">Rs {avgCollected.toLocaleString()}</span></span>
+            {bestDay && (bestDay.cash + bestDay.online) > 0 && (
+              <span>Best day: <span className="text-main font-semibold">{bestDay.label} · Rs {(bestDay.cash + bestDay.online).toLocaleString()}</span></span>
+            )}
+          </div>
+        </>
+      )}
 
       {/* Session report — one row per business session for the chosen month */}
       <div className="mt-5 pt-4 border-t border-line flex flex-wrap items-end justify-between gap-3">

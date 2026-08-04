@@ -10,6 +10,6 @@ router.route("/").get(isVerifiedUser, getOrders);
 router.route("/:id").get(isVerifiedUser, getOrderById);
 router.route("/:id").put(isVerifiedUser, authorize("Admin", "Cashier", "Superadmin"), updateOrder);
 router.route("/:id/settle").put(isVerifiedUser, authorize("Admin", "Cashier", "Superadmin"), settleOrder);
-router.route("/:id").delete(isVerifiedUser, authorize("Admin", "Superadmin"), deleteOrder);   // delete = Admin/Superadmin only
+router.route("/:id").delete(isVerifiedUser, authorize("Superadmin"), deleteOrder);   // delete = Superadmin only
 
 module.exports = router;

@@ -1,5 +1,6 @@
 import React from "react";
-import { FaUserCircle, FaBell, FaMoon, FaSun } from "react-icons/fa";
+import { FaUserCircle, FaMoon, FaSun } from "react-icons/fa";
+import NotificationBell from "./NotificationBell";
 import logo from "../../assets/images/logo.png";
 import { useDispatch, useSelector } from "react-redux";
 import { IoLogOut } from "react-icons/io5";
@@ -64,9 +65,7 @@ const Header = () => {
             <MdDashboard className="text-lg sm:text-xl" />
           </button>
         )}
-        <button title="Notifications" className="bg-base hover:bg-hover border border-line rounded-xl p-2.5 text-main transition-colors">
-          <FaBell className="text-lg sm:text-xl" />
-        </button>
+        <NotificationBell />
 
         <div className="flex items-center gap-2 sm:gap-3 sm:pl-2 sm:ml-1 sm:border-l sm:border-line">
           <FaUserCircle className="text-main text-3xl sm:text-4xl shrink-0" />

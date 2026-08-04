@@ -3,6 +3,7 @@ const config = require("./config/config");
 const globalErrorHandler = require("./middlewares/globalErrorHandler");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const compression = require("compression");
 const createHttpError = require("http-errors");
 const app = express();
 
@@ -10,6 +11,9 @@ const PORT = config.port;
 
 // Trust the Vercel/proxy hop so rate-limit & secure cookies see the real client.
 app.set("trust proxy", 1);
+
+// Gzip all responses — shrinks the large orders/reports JSON ~5-10x over the wire.
+app.use(compression());
 
 // Middlewares
 app.use(cors({
