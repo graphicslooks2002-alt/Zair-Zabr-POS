@@ -38,6 +38,7 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
       <div class="divider"></div>
       <div class="row"><span>Bill #: ${orderInfo._id ? orderInfo._id.slice(-6).toUpperCase() : "—"}</span><span>${formatDateAndTime(orderInfo.orderDate)}</span></div>
       <div class="row"><span>Customer: ${c.name || "—"}</span><span>${orderInfo.orderType || ""}</span></div>
+      ${c.phone && c.phone !== "N/A" ? `<div class="row"><span>Phone: ${c.phone}</span></div>` : ""}
       <table class="items">
         <thead>
           <tr><th class="qty">Qty</th><th class="name">Product Name</th><th class="num">Rate</th><th class="num">Amount</th></tr>
@@ -120,6 +121,9 @@ const Invoice = ({ orderInfo, setShowInvoice }) => {
             <span>Customer: {c.name || "—"}</span>
             <span>{orderInfo.orderType || ""}</span>
           </div>
+          {c.phone && c.phone !== "N/A" && (
+            <div className="text-xs mt-0.5">Phone: {c.phone}</div>
+          )}
 
           {/* Items table */}
           <table className="w-full text-xs mt-2" style={{ borderCollapse: "collapse" }}>
