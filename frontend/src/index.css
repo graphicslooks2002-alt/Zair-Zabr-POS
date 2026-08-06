@@ -4,6 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Accent (orange) outline + soft glow for boxes/cards — same in dark & light.
+   `!important` so it overrides Tailwind border-* utilities on the same element. */
+.accent-box {
+  border: 1.5px solid #e85d04 !important;
+  box-shadow: 0 0 0 1px rgba(232, 93, 4, 0.10), 0 6px 18px rgba(232, 93, 4, 0.18) !important;
+}
+.accent-btn {
+  box-shadow: 0 3px 10px rgba(232, 93, 4, 0.28) !important;
+}
+
 /* ---------- Theme tokens ---------- */
 :root {                 /* Dark (default) */
   color-scheme: dark;   /* native controls (date picker, scrollbars) match theme */

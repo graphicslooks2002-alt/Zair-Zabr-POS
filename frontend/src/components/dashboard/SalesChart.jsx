@@ -200,7 +200,7 @@ const SalesChart = () => {
   };
 
   return (
-    <div className="container mx-auto bg-surface border border-line p-4 sm:p-5 rounded-lg">
+    <div className="accent-box container mx-auto bg-surface p-4 sm:p-5 rounded-lg">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
         <div>
           <h2 className="text-main text-xl font-semibold">Sales Trend</h2>

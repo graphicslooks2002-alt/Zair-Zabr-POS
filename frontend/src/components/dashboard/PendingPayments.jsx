@@ -34,7 +34,7 @@ const PendingPayments = () => {
       <h2 className="font-semibold text-main text-xl mb-1">Pending Payments</h2>
       <p className="text-sm text-muted mb-4">Outstanding amounts customers promised to pay later.</p>
 
-      <div className="overflow-x-auto rounded-lg bg-panel">
+      <div className="accent-box overflow-x-auto rounded-lg bg-panel">
         <table className="w-full text-left text-sm">
           <thead className="text-muted border-b border-elevated">
             <tr>

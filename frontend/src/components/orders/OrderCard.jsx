@@ -44,7 +44,7 @@ const OrderCard = ({ order }) => {
   });
 
   return (
-    <div className="w-full bg-surface p-4 rounded-lg mb-4">
+    <div className="accent-box w-full bg-surface p-4 rounded-lg mb-4">
       <div className="flex items-center gap-5">
         <button className="bg-accent p-3 text-xl font-bold rounded-lg text-white">
           {getAvatarName(order.customerDetails.name)}

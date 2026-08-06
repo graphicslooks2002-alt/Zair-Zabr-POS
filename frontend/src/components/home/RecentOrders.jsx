@@ -37,7 +37,7 @@ const RecentOrders = () => {
 
   return (
     <div className="px-8 mt-6">
-      <div className="bg-panel w-full h-[450px] rounded-lg">
+      <div className="accent-box bg-panel w-full h-[450px] rounded-lg">
         <div className="flex justify-between items-center px-6 py-4">
           <h1 className="text-main text-lg font-semibold tracking-wide">
             Recent Orders

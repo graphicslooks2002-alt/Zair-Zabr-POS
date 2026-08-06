@@ -24,7 +24,7 @@ const RecentOrders = () => {
   const pageItems = orders.slice((page - 1) * PER_PAGE, page * PER_PAGE);
 
   return (
-    <div className="container mx-auto bg-surface p-4 rounded-lg">
+    <div className="accent-box container mx-auto bg-surface p-4 rounded-lg">
       <h2 className="text-main text-xl font-semibold mb-4">Recent Orders</h2>
       <div className="overflow-x-auto">
         <table className="w-full text-left text-main">

@@ -2,7 +2,7 @@ import React from 'react'
 
 const MiniCard = ({title, icon, number, footerNum, subtitle}) => {
   return (
-    <div className='bg-panel py-5 px-5 rounded-lg w-full'>
+    <div className='accent-box bg-panel py-5 px-5 rounded-lg w-full'>
         <div className='flex items-start justify-between'>
             <h1 className='text-main text-lg font-semibold tracking-wide'>{title}</h1>
             <button className={`${title === "Total Earnings" ? "bg-success" : "bg-accent"} p-3 rounded-lg text-white text-2xl`}>{icon}</button>
